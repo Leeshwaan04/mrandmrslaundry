@@ -18,7 +18,6 @@ import {
   Phone,
   MessageSquare
 } from 'lucide-react';
-import ThreeAppOrbitSection from './ThreeAppOrbitSection';
 import ElementalWaterBackground from './ElementalWaterBackground';
 
 const DRUM_SEGMENTS = [
@@ -734,11 +733,6 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 2B. THREEUI APP ORBIT — 3D TACTILE STAGE DECKS TRANSITION THEATRE         */}
-      {/* Reference: https://threeui.com/three-js/app-orbit                         */}
-      {/* ========================================================================= */}
-      <ThreeAppOrbitSection onOpenBooking={onOpenBooking} />
 
       {/* ========================================================================= */}
       {/* 3. WHY CHOOSE MR AND MRS LAUNDRY?                                         */}
