@@ -221,10 +221,10 @@ export default function ContactPage({ onOpenBooking }) {
               </div>
 
               <a
-                href="mailto:contact@mrandmrslaundry.com"
+                href="mailto:mrmrslaundry29@gmail.com"
                 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64d2ff', textDecoration: 'none' }}
               >
-                contact@mrandmrslaundry.com
+                mrmrslaundry29@gmail.com
               </a>
             </div>
 

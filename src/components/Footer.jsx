@@ -255,6 +255,19 @@ export default function Footer({ onNavigate, onOpenBooking, onOpenTrackOrder }) 
               </div>
 
               <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64d2ff', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>
+                  <Mail size={15} />
+                  <span>Official Email</span>
+                </div>
+                <a
+                  href="mailto:mrmrslaundry29@gmail.com"
+                  style={{ fontSize: '0.95rem', color: '#ffffff', fontWeight: 600, textDecoration: 'none' }}
+                >
+                  mrmrslaundry29@gmail.com
+                </a>
+              </div>
+
+              <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ffd60a', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>
                   <Clock size={15} />
                   <span>Store Hours</span>
