@@ -1,0 +1,30 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Scratch recordings & root duplicates
+/Create_detailed_e2e_video_1080p_20261008222550.mp4
+/on-my-own-chill-winston-main-version-49662-02-59.mp3
+/Oct 08 - 22_09/
+.agents/

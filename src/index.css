@@ -1,0 +1,494 @@
+/* ==========================================================================
+   MR & MRS LAUNDRY — APPLE-INSPIRED DESIGN SYSTEM & MOTION ENGINE
+   ========================================================================== */
+
+:root {
+  --bg-primary: #000000;
+  --bg-secondary: #0c0d12;
+  --bg-tertiary: #14151b;
+  --bg-elevated: #1a1b24;
+  
+  --text-primary: #f5f5f7;
+  --text-secondary: #86868b;
+  --text-tertiary: #515154;
+  --text-accent: #2997ff;
+  
+  --accent-blue: #0071e3;
+  --accent-blue-hover: #0077ed;
+  --accent-cyan: #2997ff;
+  --accent-teal: #64d2ff;
+  --accent-purple: #bf5af2;
+  --accent-emerald: #30d158;
+  --accent-orange: #ff9f0a;
+
+  --glass-bg: rgba(26, 27, 35, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-hover: rgba(255, 255, 255, 0.25);
+  --glass-glow: rgba(41, 151, 255, 0.15);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", sans-serif;
+  --font-mono: "SF Mono", "Space Grotesk", Menlo, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 50px rgba(0, 113, 227, 0.35);
+  --shadow-glass: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+  --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  line-height: 1.5;
+  color: var(--text-primary);
+  selection-background-color: var(--accent-blue);
+}
+
+::selection {
+  background: rgba(41, 151, 255, 0.3);
+  color: #ffffff;
+}
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2a32;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #444452;
+}
+
+/* Apple Typography Classes */
+.headline-hero {
+  font-size: clamp(3rem, 7vw, 6.2rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  background: linear-gradient(180deg, #FFFFFF 20%, #A1A1A6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.headline-section {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  background: linear-gradient(180deg, #FFFFFF 10%, #B0B0B8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subheadline {
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.gradient-blue-text {
+  background: linear-gradient(135deg, #64d2ff 0%, #2997ff 50%, #5856d6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-gold-text {
+  background: linear-gradient(135deg, #ffe58f 0%, #ffd666 50%, #faad14 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Frosted Glass Utilities */
+.apple-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-glass);
+}
+
+.apple-glass-card {
+  background: rgba(18, 19, 26, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xl);
+  transition: all 0.4s var(--ease-apple);
+  position: relative;
+  overflow: hidden;
+}
+
+.apple-glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-4px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(41, 151, 255, 0.12);
+}
+
+/* Apple Buttons */
+.apple-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: linear-gradient(180deg, #0077ed 0%, #0066cc 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 18px rgba(0, 113, 227, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s var(--ease-apple);
+  letter-spacing: -0.01em;
+}
+
+.apple-btn-primary:hover {
+  background: linear-gradient(180deg, #1f8aff 0%, #0071e3 100%);
+  transform: scale(1.02);
+  box-shadow: 0 6px 26px rgba(0, 113, 227, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.apple-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.apple-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s var(--ease-apple);
+}
+
+.apple-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.02);
+}
+
+.apple-btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Ambient Radial Glows */
+.ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.45;
+}
+
+.glow-blue {
+  background: radial-gradient(circle, #0071e3 0%, rgba(0, 113, 227, 0) 70%);
+}
+
+.glow-cyan {
+  background: radial-gradient(circle, #2997ff 0%, rgba(41, 151, 255, 0) 70%);
+}
+
+.glow-purple {
+  background: radial-gradient(circle, #bf5af2 0%, rgba(191, 90, 242, 0) 70%);
+}
+
+/* Animations */
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.05); }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes waterFlow {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 4s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spinSlow 20s linear infinite;
+}
+
+.animate-float {
+  animation: waterFlow 6s ease-in-out infinite;
+}
+
+/* Apple Badge */
+.apple-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(41, 151, 255, 0.12);
+  border: 1px solid rgba(41, 151, 255, 0.3);
+  border-radius: var(--radius-full);
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 0 20px rgba(41, 151, 255, 0.15);
+}
+
+/* Form Styles */
+input, select, textarea {
+  font-family: inherit;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent-cyan);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(41, 151, 255, 0.2);
+}
+
+/* Responsive grid helper */
+.container-max {
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* ==========================================================================
+   21st.dev & threeui.com — SPOTLIGHT & SHIMMER DESIGN PRIMITIVES
+   ========================================================================== */
+
+/* Shimmer Border Container */
+.shimmer-border-box {
+  position: relative;
+  background: rgba(16, 17, 24, 0.75);
+  border-radius: 24px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.shimmer-border-box::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    transparent,
+    rgba(41, 151, 255, 0.4),
+    transparent 30%
+  );
+  animation: rotateShimmer 6s linear infinite;
+  z-index: -2;
+}
+
+.shimmer-border-box::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: inherit;
+  border-radius: 23px;
+  z-index: -1;
+}
+
+@keyframes rotateShimmer {
+  100% {
+    transform: rotate(1turn);
+  }
+}
+
+/* Tech dot grid background */
+.dot-grid-bg {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Linear fine grid */
+.tech-grid-bg {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ThreeUI Glass Card with Specular Top Edge */
+.threeui-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(24, 26, 36, 0.65) 0%, rgba(12, 13, 18, 0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 24px;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 
+    0 20px 40px -15px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.threeui-card:hover {
+  border-color: rgba(64, 169, 255, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 
+    0 30px 60px -20px rgba(0, 0, 0, 0.85),
+    0 0 35px rgba(0, 113, 227, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* TasteSkill Editorial Monospace Badge */
+.tasteskill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64d2ff;
+  background: rgba(0, 113, 227, 0.1);
+  border: 1px solid rgba(0, 113, 227, 0.28);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* Pulsing Live Beacon */
+.live-beacon {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #30d158;
+  border-radius: 50%;
+}
+
+.live-beacon::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: inherit;
+  animation: beaconPing 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes beaconPing {
+  75%, 100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* 21st.dev Interactive Glow Button */
+.btn-aura-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #0077ed 0%, #0056b3 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.96rem;
+  letter-spacing: -0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 
+    0 8px 24px rgba(0, 113, 227, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  overflow: hidden;
+}
+
+.btn-aura-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.btn-aura-primary:hover::before {
+  left: 100%;
+}
+
+.btn-aura-primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 12px 32px rgba(0, 113, 227, 0.6),
+    0 0 20px rgba(100, 210, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.btn-aura-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
