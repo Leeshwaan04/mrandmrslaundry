@@ -23,10 +23,10 @@ import ElementalWaterBackground from './ElementalWaterBackground';
 const DRUM_SEGMENTS = [
   {
     id: 1,
-    badge: 'STAGE 01 // LOW-RPM MOLECULAR SOAK',
-    title: 'Ultrasonic Ionic Saturation',
+    badge: 'STAGE 01 // 24/7 DOORSTEP PICKUP & HYGIENE SORTING',
+    title: '1. Schedule & Doorstep Collection',
     description:
-      'The titanium drum begins a slow, calibrated rotation. Reverse-osmosis fluid suspended with micro-cavitation enzymes saturates delicate silk, wool, and cotton fibers without harsh mechanical friction.',
+      'Book your laundry pickup online, on WhatsApp, or call +91 9152233822 anytime 24/7. Our logistics desk collects your garments right from your doorstep across Mumbai with 100% individual processing — your clothes are never mixed with other households.',
     startTime: 0.0,
     endTime: 2.5,
     progressStart: 0.0,
@@ -34,17 +34,17 @@ const DRUM_SEGMENTS = [
     color: '#64d2ff',
     glowColor: 'rgba(100, 210, 255, 0.35)',
     specs: [
-      { label: 'Drum Speed', val: '420 RPM' },
-      { label: 'Ultrasonic Freq', val: '24 kHz' },
-      { label: 'Thermal Profile', val: '28°C Cold' },
+      { label: 'Pickup SLA', val: '24/7 Punctual Slots' },
+      { label: 'Hygiene Rule', val: '100% Dedicated Load' },
+      { label: 'Free Delivery', val: 'Orders ₹399+' },
     ],
   },
   {
     id: 2,
-    badge: 'STAGE 02 // DUAL-HELIX VORTEX',
-    title: 'Laminar Fluid Hydrodynamics',
+    badge: 'STAGE 02 // TEMPERATURE-CONTROLLED ECO WASH',
+    title: '2. Expert Hydro-Wash & Stain Treatment',
     description:
-      'As velocity accelerates, water forms counter-rotational vortices along the aircraft-grade perforated baffles. Garments float in continuous liquid suspension, lifting stubborn soil with zero thread strain.',
+      'At our Malad East facility, garments undergo fabric sorting and pre-spotting with premium biodegradable, color-protecting detergents. From ₹99/Kg Wash & Fold to non-toxic Hydrocarbon dry cleaning, fabrics stay fresh, soft, and vibrant.',
     startTime: 2.5,
     endTime: 5.0,
     progressStart: 0.25,
@@ -52,17 +52,17 @@ const DRUM_SEGMENTS = [
     color: '#2997ff',
     glowColor: 'rgba(41, 151, 255, 0.38)',
     specs: [
-      { label: 'Vortex Current', val: '980 RPM' },
-      { label: 'Fiber Friction', val: '0.00% Zero' },
-      { label: 'Stain Lift Rate', val: '99.4% AI Match' },
+      { label: 'Detergents', val: 'Eco Bio-Degradable' },
+      { label: 'Dry Cleaning', val: 'Hydrocarbon Non-Toxic' },
+      { label: 'Stain Care', val: 'Individual Pre-Spot' },
     ],
   },
   {
     id: 3,
-    badge: 'STAGE 03 // CENTRIFUGAL MICRO-PURGE',
-    title: 'Precision Micro-Extraction',
+    badge: 'STAGE 03 // LOW-TENSILE EXTRACTION & DRYING',
+    title: '3. Gentle Hydro-Spin & Chamber Drying',
     description:
-      'High-G centrifugal acceleration evacuates 92% of residual moisture through microscopic laser-cut aperture ports, bypassing destructive high-heat drying and conserving delicate elastane fibers.',
+      'Balanced high-efficiency centrifugal extraction evacuates over 85% of retained moisture without mechanical thread strain. Silks, woolens, and delicate ethnic wears dry in humidity-controlled chambers, preventing shrinkage and color bleeding.',
     startTime: 5.0,
     endTime: 7.5,
     progressStart: 0.5,
@@ -70,17 +70,17 @@ const DRUM_SEGMENTS = [
     color: '#bf5af2',
     glowColor: 'rgba(191, 90, 242, 0.35)',
     specs: [
-      { label: 'Centrifugal Force', val: '1,450 RPM' },
-      { label: 'Moisture Evac', val: '92.4%' },
-      { label: 'Yarn Tensile Loss', val: '0.00 dB' },
+      { label: 'Moisture Evac', val: '85%+ High Efficiency' },
+      { label: 'Fabric Safety', val: 'Zero Shrinkage' },
+      { label: 'Drying Profile', val: 'Humidity Controlled' },
     ],
   },
   {
     id: 4,
-    badge: 'STAGE 04 // DECELERATION & OZONE RECONDITIONING',
-    title: 'Anti-Crease Aeration Finish',
+    badge: 'STAGE 04 // INDUSTRIAL STEAM PRESS & PACKING',
+    title: '4. Delivered Fresh To Your Doorstep',
     description:
-      'The cylinder decelerates under magnetic electromagnetic braking. A warm cross-flow of medical-grade gaseous ozone billows through textiles, sanitizing 99.99% of bacteria and returning clothes ready for steam form.',
+      'Garments receive professional steam press finishing for razor-sharp, wrinkle-free drape, then sealed in protective moisture-barrier packaging. Delivered on time within 24 to 48 hours (or 24h Express) with free delivery on orders ₹399+.',
     startTime: 7.5,
     endTime: 10.0,
     progressStart: 0.75,
@@ -88,9 +88,9 @@ const DRUM_SEGMENTS = [
     color: '#30d158',
     glowColor: 'rgba(48, 209, 88, 0.35)',
     specs: [
-      { label: 'Decel Braking', val: '120 RPM Gentle' },
-      { label: 'Ozone Sterility', val: '99.99%' },
-      { label: 'Finish State', val: 'Crease-Free' },
+      { label: 'Steam Finishing', val: 'Industrial Ironing' },
+      { label: 'Packaging', val: 'Sealed Barrier Packing' },
+      { label: 'Turnaround', val: '24h Express / 48h Std' },
     ],
   },
 ];
@@ -179,7 +179,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
   const servicesSnapshot = [
     { title: 'Wash & Fold Laundry', price: '₹99/Kg', desc: 'Everyday casual wear, sanitised and neatly fold-packed.', color: '#64d2ff' },
-    { title: 'Wash & Iron Laundry', price: '₹159/Kg', desc: 'Crisp industrial steam pressing ready to wear or hang.', color: '#2997ff' },
+    { title: 'Wash & Iron Laundry', price: '₹199/Kg', desc: 'Crisp industrial steam pressing ready to wear or hang.', color: '#2997ff' },
     { title: 'Dry Cleaning', price: 'Starts @ ₹99', desc: 'Designer suits, silk sarees, delicate embroidery care.', color: '#bf5af2' },
     { title: 'Shoe Laundry & Spa', price: 'Starts @ ₹299', desc: 'Sneakers, leather, suede deep cleaned and deodorised.', color: '#ffd60a' },
     { title: 'Express Laundry (24h)', price: 'Starts @ ₹299/Kg', desc: 'Guaranteed 24-hour rapid turnaround to your door.', color: '#ff375f' },
@@ -404,7 +404,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
                 gap: '8px',
               }}
             >
-              <span>Explore Drum Physics</span>
+              <span>Explore Wash Process</span>
               <ChevronDown size={16} />
             </button>
           </motion.div>
@@ -426,7 +426,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
             cursor: 'pointer',
           }}
         >
-          <span>Scroll down for the interactive drum reveal</span>
+          <span>Scroll down to explore our 4-stage cleaning process</span>
           <ChevronDown size={18} style={{ animation: 'bounce 2s infinite' }} />
         </div>
       </section>
@@ -723,7 +723,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
                       boxShadow: '0 8px 25px rgba(0, 113, 227, 0.45)',
                     }}
                   >
-                    <span>Reserve Concierge Pickup</span>
+                    <span>Schedule Free Doorstep Pickup</span>
                     <ArrowRight size={16} />
                   </button>
                 </div>

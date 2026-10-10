@@ -22,24 +22,23 @@ export default function InteractiveCalculator({ onOpenBookingWithCustomPlan }) {
   };
 
   const itemMeta = {
-    washAndFoldKg: { label: 'Everyday Wash & Fold', unit: 'kg', rate: 4.5, icon: <Shirt size={22} color="#64d2ff" />, desc: 'HydroSonic gentle spin, laser fold' },
-    suits: { label: 'Bespoke Tailored Suits', unit: 'pcs', rate: 24, icon: <Briefcase size={22} color="#2997ff" />, desc: 'Steam-formed, breathable cedar hanger' },
-    silkCashmere: { label: 'Silk & Cashmere Couture', unit: 'pcs', rate: 18, icon: <Feather size={22} color="#bf5af2" />, desc: 'Zero-tension cold liquid immersion' },
-    sneakers: { label: 'Designer Sneaker Spa', unit: 'pairs', rate: 32, icon: <Footprints size={22} color="#30d158" />, desc: 'Deep ultrasonic sole & suede revival' },
-    bedding: { label: 'Egyptian Cotton Duvet Sets', unit: 'sets', rate: 26, icon: <BedDouble size={22} color="#ff9f0a" />, desc: 'Ozone sanitized, anti-dust mite' },
+    washAndFoldKg: { label: 'Wash & Fold Daily Wear', unit: 'kg', rate: 99, icon: <Shirt size={22} color="#64d2ff" />, desc: 'Deep hygienic wash, color care & neat fold' },
+    suits: { label: 'Coat / Blazer Dry Clean', unit: 'pcs', rate: 249, icon: <Briefcase size={22} color="#2997ff" />, desc: 'Professional steam press on suit hanger' },
+    silkCashmere: { label: 'Saree / Designer Wear', unit: 'pcs', rate: 199, icon: <Feather size={22} color="#bf5af2" />, desc: 'Delicate pH-neutral solvent wash & zari care' },
+    sneakers: { label: 'Shoe Laundry & Spa', unit: 'pairs', rate: 299, icon: <Footprints size={22} color="#30d158" />, desc: 'Deep mid-sole foam scrub & deodorization' },
+    bedding: { label: 'Blanket / Heavy Quilt', unit: 'pcs', rate: 249, icon: <BedDouble size={22} color="#ff9f0a" />, desc: 'Thermal sanitization & dust-mite removal' },
   };
 
   const scentOptions = [
-    { id: 'rain', name: 'Clean Rain & Bergamot', tag: 'Fresh / Citrus' },
-    { id: 'lavender', name: 'French Alpine Lavender', tag: 'Relaxing / Floral' },
-    { id: 'cedar', name: 'Kyoto Hinoki & Cedar', tag: 'Warm / Earthy' },
-    { id: 'hypo', name: '0% Unscented Pure Hypoallergenic', tag: 'Medical Clean' },
+    { id: 'rain', name: 'Fresh Ocean & Citrus', tag: 'Everyday Fresh' },
+    { id: 'lavender', name: 'French Alpine Lavender', tag: 'Gentle / Relaxing' },
+    { id: 'cedar', name: 'Natural Sandal & Cedar', tag: 'Warm / Subtle' },
+    { id: 'hypo', name: '100% Unscented Pure Hypoallergenic', tag: 'Baby & Sensitive Skin' },
   ];
 
   const speedOptions = [
-    { id: 'standard', name: '24-Hour Standard', surcharge: 0, badge: 'Eco Fleet' },
-    { id: 'express', name: '6-Hour Express', surcharge: 16, badge: 'Priority Slot' },
-    { id: 'rush', name: '2-Hour Instant Concierge', surcharge: 29, badge: 'Dedicated Van' },
+    { id: 'standard', name: '24–48h Standard Delivery', surcharge: 0, badge: 'Standard SLA' },
+    { id: 'express', name: '24-Hour Express Laundry', surcharge: 99, badge: 'Fast Track' },
   ];
 
   // Calculate pricing
@@ -51,7 +50,7 @@ export default function InteractiveCalculator({ onOpenBookingWithCustomPlan }) {
     items.bedding * itemMeta.bedding.rate;
 
   const currentSpeed = speedOptions.find((s) => s.id === speed) || speedOptions[0];
-  const totalPrice = Math.max(28, basePrice + currentSpeed.surcharge);
+  const totalPrice = Math.max(99, basePrice + currentSpeed.surcharge);
   const carbonOffsetKg = (basePrice * 0.12).toFixed(1);
 
   const handleCheckout = () => {
@@ -164,7 +163,7 @@ export default function InteractiveCalculator({ onOpenBookingWithCustomPlan }) {
                             {meta.label}
                           </div>
                           <div style={{ fontSize: '0.78rem', color: '#86868b' }}>
-                            ${meta.rate}/{meta.unit} • {meta.desc}
+                            ₹{meta.rate}/{meta.unit} • {meta.desc}
                           </div>
                         </div>
                       </div>
@@ -308,9 +307,9 @@ export default function InteractiveCalculator({ onOpenBookingWithCustomPlan }) {
                     lineHeight: 1.1,
                   }}
                 >
-                  ${Math.round(totalPrice)}
+                  ₹{Math.round(totalPrice)}
                   <span style={{ fontSize: '1rem', color: '#86868b', fontWeight: 500, marginLeft: '6px' }}>
-                    USD
+                    INR
                   </span>
                 </div>
               </div>
@@ -349,7 +348,7 @@ export default function InteractiveCalculator({ onOpenBookingWithCustomPlan }) {
                           color: '#fff',
                         }}
                       >
-                        {s.surcharge === 0 ? 'Included' : `+$${s.surcharge}`}
+                        {s.surcharge === 0 ? 'Included' : `+₹${s.surcharge}`}
                       </span>
                     </div>
                   ))}
@@ -372,15 +371,15 @@ export default function InteractiveCalculator({ onOpenBookingWithCustomPlan }) {
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Check size={14} color="#30d158" />
-                  <span>Free doorstep pickup &amp; delivery over $35</span>
+                  <span>Free doorstep pickup &amp; delivery over ₹399</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Check size={14} color="#30d158" />
-                  <span>Zero-abrasion HydroSonic™ cavitation guarantee</span>
+                  <span>100% Dedicated load — never mixed with others</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Shield size={14} color="#64d2ff" />
-                  <span>$10,000 Wardrobe Insurance per pickup</span>
+                  <span>10% OFF on your very first order</span>
                 </div>
               </div>
 

@@ -32,8 +32,8 @@ export const ALL_SERVICES = [
   {
     id: 'wash-iron',
     name: 'Wash & Iron Laundry',
-    price: '₹159 / Kg',
-    rateNum: 159,
+    price: '₹199 / Kg',
+    rateNum: 199,
     unit: 'Kg',
     tag: 'OFFICE & CASUAL WEAR',
     desc: 'We clean and professionally steam press your garments, so they arrive wrinkle-free, perfectly packed, and wardrobe ready to wear.',
@@ -170,7 +170,7 @@ export default function ServicesPage({ onOpenBooking }) {
 
   const calculatedTotal =
     calcItems.washFoldKg * 99 +
-    calcItems.washIronKg * 159 +
+    calcItems.washIronKg * 199 +
     calcItems.shirtsCount * 99 +
     calcItems.pantsCount * 99 +
     calcItems.sareesCount * 199 +
@@ -405,7 +405,7 @@ export default function ServicesPage({ onOpenBooking }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {[
                   { key: 'washFoldKg', label: 'Wash & Fold Daily Wear (₹99/Kg)', unit: 'Kg' },
-                  { key: 'washIronKg', label: 'Wash & Steam Iron (₹159/Kg)', unit: 'Kg' },
+                  { key: 'washIronKg', label: 'Wash & Steam Iron (₹199/Kg)', unit: 'Kg' },
                   { key: 'shirtsCount', label: 'Dry Clean: Shirts / T-Shirts (₹99 ea)', unit: 'Pcs' },
                   { key: 'pantsCount', label: 'Dry Clean: Pants / Jeans (₹99 ea)', unit: 'Pcs' },
                   { key: 'sareesCount', label: 'Dry Clean: Saree / Gown (₹199 ea)', unit: 'Pcs' },
