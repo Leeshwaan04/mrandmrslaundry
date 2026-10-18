@@ -104,10 +104,17 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
   const drumContainerRef = useRef(null);
   const drumVideoRef = useRef(null);
-  const isSeekingRef = useRef(false);
+  const drumInViewRef = useRef(true);
+  const drumTargetTimeRef = useRef(0);
+  const drumCurrentTimeRef = useRef(0);
 
+  // Only pay the layout-read + state-update cost while the drum section is
+  // anywhere near the viewport — otherwise this ran on every scroll event
+  // for the entire page, including deep into unrelated sections. Starts
+  // optimistically "in view" so the initial recalc below isn't skipped
+  // before the observer's first (async) callback has fired.
   useEffect(() => {
-    const handleScroll = () => {
+    const recalc = () => {
       if (!drumContainerRef.current) return;
 
       const rect = drumContainerRef.current.getBoundingClientRect();
@@ -128,21 +135,72 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
         if (progress >= 1.0) activeIdx = DRUM_SEGMENTS.length - 1;
         setCurrentSegmentIdx(activeIdx);
 
-        if (drumVideoRef.current && drumVideoRef.current.readyState >= 2) {
-          const targetDuration = videoDuration || 10.0;
-          const targetTime = Math.min(Math.max(progress * targetDuration, 0), targetDuration - 0.05);
-
-          if (!isSeekingRef.current && Math.abs(drumVideoRef.current.currentTime - targetTime) > 0.03) {
-            isSeekingRef.current = true;
-            drumVideoRef.current.currentTime = targetTime;
-          }
-        }
+        const targetDuration = videoDuration || 10.0;
+        drumTargetTimeRef.current = Math.min(Math.max(progress * targetDuration, 0), targetDuration - 0.05);
       }
     };
 
+    let scheduled = false;
+    const handleScroll = () => {
+      if (!drumInViewRef.current || scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        recalc();
+      });
+    };
+
+    recalc();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    let io;
+    const el = drumContainerRef.current;
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          drumInViewRef.current = entry.isIntersecting;
+        },
+        { rootMargin: '50% 0px' }
+      );
+      io.observe(el);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (io) io.disconnect();
+    };
   }, [videoDuration]);
+
+  // Buttery scroll-scrubbing: ease currentTime toward the scroll-derived
+  // target every frame (same proven pattern as CottonJourneyScroll/
+  // KeynoteScrubber) instead of issuing one uneased seek per scroll event,
+  // which visibly stutters/skips while the previous seek is still decoding.
+  useEffect(() => {
+    let rafId;
+    const tick = () => {
+      const v = drumVideoRef.current;
+      if (v && drumInViewRef.current && v.readyState >= 2) {
+        const diff = drumTargetTimeRef.current - drumCurrentTimeRef.current;
+        drumCurrentTimeRef.current += diff * 0.18;
+
+        if (Math.abs(v.currentTime - drumCurrentTimeRef.current) > 0.02) {
+          try {
+            if (v.fastSeek) v.fastSeek(drumCurrentTimeRef.current);
+            else v.currentTime = drumCurrentTimeRef.current;
+          } catch (e) {
+            try {
+              v.currentTime = drumCurrentTimeRef.current;
+            } catch (e2) {
+              /* noop */
+            }
+          }
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   const [copiedCoupon, setCopiedCoupon] = useState(null);
   const handleCopyCode = (code) => {
@@ -163,10 +221,6 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
       }
       drumVideoRef.current.currentTime = 0.01;
       drumVideoRef.current.pause();
-
-      drumVideoRef.current.addEventListener('seeked', () => {
-        isSeekingRef.current = false;
-      });
     }
   };
 

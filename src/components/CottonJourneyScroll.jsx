@@ -113,6 +113,7 @@ export default function CottonJourneyScroll() {
   const targetTimeRef = useRef(0);
   const currentTimeRef = useRef(0);
   const rafRef = useRef(null);
+  const inViewRef = useRef(true);
 
   const [duration, setDuration] = useState(0);
   const [isReady, setIsReady] = useState(false);
@@ -144,11 +145,13 @@ export default function CottonJourneyScroll() {
     setHasError(true);
   }, []);
 
-  // Scroll -> progress, for scrub mode and simple (mobile) mode only.
+  // Scroll -> progress, for scrub mode and simple (mobile) mode only. Gated
+  // by IntersectionObserver so this (and its layout read) is skipped while
+  // scrolled anywhere else on the page, not just when this section is active.
   useEffect(() => {
     if (prefersReducedMotion) return undefined;
 
-    const handleScroll = () => {
+    const recalc = () => {
       const el = containerRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
@@ -173,9 +176,35 @@ export default function CottonJourneyScroll() {
       }
     };
 
+    let scheduled = false;
+    const handleScroll = () => {
+      if (!inViewRef.current || scheduled) return;
+      scheduled = true;
+      requestAnimationFrame(() => {
+        scheduled = false;
+        recalc();
+      });
+    };
+
+    recalc();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    let io;
+    const el = containerRef.current;
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          inViewRef.current = entry.isIntersecting;
+        },
+        { rootMargin: '50% 0px' }
+      );
+      io.observe(el);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (io) io.disconnect();
+    };
   }, [useScrubMode, duration, prefersReducedMotion]);
 
   // Buttery scroll-scrubbing: ease currentTime toward the scroll-derived
@@ -185,7 +214,7 @@ export default function CottonJourneyScroll() {
 
     const tick = () => {
       const v = videoRef.current;
-      if (v && isReady && !hasError) {
+      if (v && isReady && !hasError && inViewRef.current) {
         const diff = targetTimeRef.current - currentTimeRef.current;
         currentTimeRef.current += diff * 0.16;
 
