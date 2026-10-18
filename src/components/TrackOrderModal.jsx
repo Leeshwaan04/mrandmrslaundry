@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   PackageCheck
 } from 'lucide-react';
+import businessInfo from '../../content/business-info.json';
 
 export default function TrackOrderModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
@@ -19,7 +20,7 @@ export default function TrackOrderModal({ isOpen, onClose }) {
 
   const mockOrder = {
     orderId: query.startsWith('MML') ? query.toUpperCase() : 'MML-8842',
-    customerPhone: query.length >= 10 ? query : '+91 9152233822',
+    customerPhone: query.length >= 10 ? query : businessInfo.phone,
     pickupDate: 'Today, 10:30 AM',
     estimatedDelivery: 'Tomorrow by 6:00 PM',
     status: 'In Eco-Hydro Wash',
@@ -79,6 +80,7 @@ export default function TrackOrderModal({ isOpen, onClose }) {
 
         {/* Modal Window */}
         <motion.div
+          className="track-order-modal-window"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -297,7 +299,7 @@ export default function TrackOrderModal({ isOpen, onClose }) {
               >
                 <div style={{ fontSize: '0.85rem', color: '#86868b' }}>Need expedited delivery or have instructions?</div>
                 <a
-                  href="https://wa.me/919152233822"
+                  href={`https://wa.me/${businessInfo.whatsappDigits}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -339,6 +341,15 @@ export default function TrackOrderModal({ isOpen, onClose }) {
           )}
         </motion.div>
       </div>
+
+      <style>{`
+        @media (max-width: 480px) {
+          .track-order-modal-window {
+            padding: 24px 18px !important;
+            border-radius: 20px !important;
+          }
+        }
+      `}</style>
     </AnimatePresence>
   );
 }

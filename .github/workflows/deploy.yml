@@ -27,12 +27,25 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+          cache-dependency-path: |
+            package-lock.json
+            admin/package-lock.json
 
-      - name: Install dependencies
+      - name: Install main site dependencies
         run: npm ci
 
-      - name: Build project
+      # Main site MUST build first — its own build empties ./dist, which
+      # would wipe out dist/admin if the admin build ran before this.
+      - name: Build main site
         run: npm run build
+
+      - name: Install admin app dependencies
+        run: npm ci
+        working-directory: ./admin
+
+      - name: Build admin app
+        run: npm run build
+        working-directory: ./admin
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

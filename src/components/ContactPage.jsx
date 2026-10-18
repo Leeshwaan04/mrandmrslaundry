@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import businessInfo from '../../content/business-info.json';
 import {
   MapPin,
   Phone,
@@ -35,13 +36,13 @@ export default function ContactPage({ onOpenBooking }) {
     const text = encodeURIComponent(
       `Hello Mr & Mrs Laundry! I would like to schedule a pickup from ${formData.locality || 'Mumbai'}. My name is ${formData.name || 'Customer'}.`
     );
-    window.open(`https://wa.me/919152233822?text=${text}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://wa.me/${businessInfo.whatsappDigits}?text=${text}`, '_blank', 'noopener,noreferrer');
   };
 
   const faqs = [
     {
       q: '1. How do I schedule a laundry pickup?',
-      a: 'You can easily book a pickup directly on our website, via WhatsApp, or simply give us a quick call at +91 9152233822 anytime 24/7. Our executive will arrive at your door during your selected time window.',
+      a: `You can easily book a pickup directly on our website, via WhatsApp, or simply give us a quick call at ${businessInfo.phone} anytime 24/7. Our executive will arrive at your door during your selected time window.`,
     },
     {
       q: '2. What areas across Mumbai do you serve?',
@@ -53,7 +54,7 @@ export default function ContactPage({ onOpenBooking }) {
     },
     {
       q: '4. What is the minimum order for free doorstep delivery?',
-      a: 'Orders of ₹399 or more enjoy 100% FREE doorstep pickup and return delivery! For smaller orders below ₹399, a nominal ₹49 local transit fee applies.',
+      a: 'Orders of ₹399 or more enjoy 100% FREE doorstep pickup and return delivery!',
     },
     {
       q: '5. How are delicate fabrics, silk sarees, and designer suits handled?',
@@ -149,12 +150,12 @@ export default function ContactPage({ onOpenBooking }) {
               </div>
 
               <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', marginBottom: '12px' }}>
-                +91 9152233822
+                {businessInfo.phone}
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
                 <a
-                  href="tel:+919152233822"
+                  href={`tel:+${businessInfo.phoneDigits}`}
                   style={{
                     flex: 1,
                     padding: '10px 14px',
@@ -221,10 +222,10 @@ export default function ContactPage({ onOpenBooking }) {
               </div>
 
               <a
-                href="mailto:mrmrslaundry29@gmail.com"
+                href={`mailto:${businessInfo.email}`}
                 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#64d2ff', textDecoration: 'none' }}
               >
-                mrmrslaundry29@gmail.com
+                {businessInfo.email}
               </a>
             </div>
 
@@ -263,20 +264,20 @@ export default function ContactPage({ onOpenBooking }) {
               <div style={{ marginBottom: '16px' }}>
                 <div style={{ fontSize: '0.92rem', color: '#fff', fontWeight: 600 }}>Tardeo Store:</div>
                 <div style={{ fontSize: '0.85rem', color: '#86868b', lineHeight: 1.5, marginTop: '2px' }}>
-                  Shop no. 3/4, No. 508, Ganjawala Tower, G-3, Sane Guruji Marg, Behind Suman Jewellers, Bane Compound, Tardeo, Mumbai - 400034.
+                  {businessInfo.addresses[0].line1}
                 </div>
               </div>
 
               <div style={{ marginBottom: '16px' }}>
                 <div style={{ fontSize: '0.92rem', color: '#fff', fontWeight: 600 }}>Malad Central Facility:</div>
                 <div style={{ fontSize: '0.85rem', color: '#86868b', lineHeight: 1.5, marginTop: '2px' }}>
-                  Industrial Laundry Facility, Malad East, Mumbai. (Serving all suburban routes).
+                  {businessInfo.addresses[1].line1}
                 </div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#a1a1a6', fontSize: '0.82rem' }}>
                 <Clock size={14} color="#ffd60a" />
-                <span>Tue - Sun: 9:00 AM – 9:00 PM | Monday Closed</span>
+                <span>{businessInfo.hours.openDays} | {businessInfo.hours.closedDays}</span>
               </div>
             </div>
           </div>

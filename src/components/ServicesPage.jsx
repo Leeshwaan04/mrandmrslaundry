@@ -32,8 +32,8 @@ export const ALL_SERVICES = [
   {
     id: 'wash-iron',
     name: 'Wash & Iron Laundry',
-    price: '₹199 / Kg',
-    rateNum: 199,
+    price: '₹159 / Kg',
+    rateNum: 159,
     unit: 'Kg',
     tag: 'OFFICE & CASUAL WEAR',
     desc: 'We clean and professionally steam press your garments, so they arrive wrinkle-free, perfectly packed, and wardrobe ready to wear.',
@@ -130,17 +130,17 @@ export const RATE_CARD = {
     { item: 'Dupatta / Stole', rate: '₹79' },
   ],
   household: [
-    { item: 'Single Blanket / Quilt', rate: '₹249' },
-    { item: 'Double Blanket / Quilt', rate: '₹349' },
-    { item: 'Single Bed Sheet', rate: '₹99' },
-    { item: 'Double Bed Sheet', rate: '₹149' },
+    { item: 'Single Blanket / Quilt', rate: '₹299' },
+    { item: 'Double Blanket / Quilt', rate: '₹399' },
+    { item: 'Single Bed Sheet', rate: '₹129' },
+    { item: 'Double Bed Sheet', rate: '₹199' },
     { item: 'Pillow Cover (Pair)', rate: '₹49' },
     { item: 'Curtain Cleaning', rate: '₹14 / Sq.ft' },
   ],
   footwear: [
     { item: 'Sneakers / Canvas', rate: '₹299' },
-    { item: 'Sports & Running Shoes', rate: '₹299' },
-    { item: 'Leather Formal Shoes', rate: '₹399' },
+    { item: 'Sports & Running Shoes', rate: '₹399' },
+    { item: 'Leather Formal Shoes', rate: '₹499' },
     { item: 'Suede / Nubuck Footwear', rate: '₹449' },
     { item: 'Boots / High Tops', rate: '₹499' },
   ],
@@ -170,13 +170,13 @@ export default function ServicesPage({ onOpenBooking }) {
 
   const calculatedTotal =
     calcItems.washFoldKg * 99 +
-    calcItems.washIronKg * 199 +
+    calcItems.washIronKg * 159 +
     calcItems.shirtsCount * 99 +
     calcItems.pantsCount * 99 +
     calcItems.sareesCount * 199 +
     calcItems.blazerCount * 249 +
     calcItems.shoesCount * 299 +
-    calcItems.blanketCount * 249;
+    calcItems.blanketCount * 299;
 
   const qualifiesFreeDelivery = calculatedTotal >= 399;
 
@@ -405,13 +405,13 @@ export default function ServicesPage({ onOpenBooking }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 {[
                   { key: 'washFoldKg', label: 'Wash & Fold Daily Wear (₹99/Kg)', unit: 'Kg' },
-                  { key: 'washIronKg', label: 'Wash & Steam Iron (₹199/Kg)', unit: 'Kg' },
+                  { key: 'washIronKg', label: 'Wash & Steam Iron (₹159/Kg)', unit: 'Kg' },
                   { key: 'shirtsCount', label: 'Dry Clean: Shirts / T-Shirts (₹99 ea)', unit: 'Pcs' },
                   { key: 'pantsCount', label: 'Dry Clean: Pants / Jeans (₹99 ea)', unit: 'Pcs' },
                   { key: 'sareesCount', label: 'Dry Clean: Saree / Gown (₹199 ea)', unit: 'Pcs' },
                   { key: 'blazerCount', label: 'Dry Clean: Coat / Blazer (₹249 ea)', unit: 'Pcs' },
                   { key: 'shoesCount', label: 'Shoe Spa & Cleaning (₹299 ea)', unit: 'Pairs' },
-                  { key: 'blanketCount', label: 'Heavy Blanket / Quilt (₹249 ea)', unit: 'Pcs' },
+                  { key: 'blanketCount', label: 'Heavy Blanket / Quilt (₹299 ea)', unit: 'Pcs' },
                 ].map((item) => (
                   <div
                     key={item.key}

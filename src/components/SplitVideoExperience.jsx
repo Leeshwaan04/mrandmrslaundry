@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import businessInfo from '../../content/business-info.json';
 import {
   Sparkles,
   ChevronDown,
@@ -26,7 +27,7 @@ const DRUM_SEGMENTS = [
     badge: 'STAGE 01 // 24/7 DOORSTEP PICKUP & HYGIENE SORTING',
     title: '1. Schedule & Doorstep Collection',
     description:
-      'Book your laundry pickup online, on WhatsApp, or call +91 9152233822 anytime 24/7. Our logistics desk collects your garments right from your doorstep across Mumbai with 100% individual processing — your clothes are never mixed with other households.',
+      `Book your laundry pickup online, on WhatsApp, or call ${businessInfo.phone} anytime 24/7. Our logistics desk collects your garments right from your doorstep across Mumbai with 100% individual processing — your clothes are never mixed with other households.`,
     startTime: 0.0,
     endTime: 2.5,
     progressStart: 0.0,
@@ -179,7 +180,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
   const servicesSnapshot = [
     { title: 'Wash & Fold Laundry', price: '₹99/Kg', desc: 'Everyday casual wear, sanitised and neatly fold-packed.', color: '#64d2ff' },
-    { title: 'Wash & Iron Laundry', price: '₹199/Kg', desc: 'Crisp industrial steam pressing ready to wear or hang.', color: '#2997ff' },
+    { title: 'Wash & Iron Laundry', price: '₹159/Kg', desc: 'Crisp industrial steam pressing ready to wear or hang.', color: '#2997ff' },
     { title: 'Dry Cleaning', price: 'Starts @ ₹99', desc: 'Designer suits, silk sarees, delicate embroidery care.', color: '#bf5af2' },
     { title: 'Shoe Laundry & Spa', price: 'Starts @ ₹299', desc: 'Sneakers, leather, suede deep cleaned and deodorised.', color: '#ffd60a' },
     { title: 'Express Laundry (24h)', price: 'Starts @ ₹299/Kg', desc: 'Guaranteed 24-hour rapid turnaround to your door.', color: '#ff375f' },
@@ -198,7 +199,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
   ];
 
   const homeFaqs = [
-    { q: '1. How do I schedule a laundry pickup?', a: 'You can easily book a pickup directly on our website, WhatsApp us at +91 9152233822, or simply call 24/7. Our executive will arrive at your chosen Mumbai time slot.' },
+    { q: '1. How do I schedule a laundry pickup?', a: `You can easily book a pickup directly on our website, WhatsApp us at ${businessInfo.phone}, or simply call 24/7. Our executive will arrive at your chosen Mumbai time slot.` },
     { q: '2. What areas across Mumbai do you serve?', a: 'We proudly serve all localities across South Mumbai (Tardeo, Colaba, Worli, Lower Parel), Western Suburbs (Bandra, Juhu, Andheri, Malad, Borivali), Central Mumbai (Powai, Chembur), Navi Mumbai, and Thane.' },
     { q: '3. How long does it take to get my clothes back?', a: 'Standard wash and steam press takes 24–48 hours. We also provide a guaranteed 24-hour Express Laundry service for urgent requirements.' },
     { q: '4. What is the minimum order for free doorstep pickup?', a: 'Orders of ₹399 or more enjoy 100% FREE doorstep pickup and return delivery across Mumbai!' },
@@ -477,6 +478,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
           {/* Theatre Box */}
           <div
+            id="drum-theatre-box"
             style={{
               position: 'relative',
               width: '94%',
@@ -525,6 +527,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
             {/* Top Stage Bar: Segment Navigation */}
             <div
+              id="drum-stage-top"
               style={{
                 position: 'relative',
                 zIndex: 5,
@@ -579,6 +582,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
             {/* Bottom Stage: Progressively Revealed Narrative Card */}
             <div
+              id="drum-stage-bottom"
               style={{
                 position: 'relative',
                 zIndex: 5,
@@ -670,6 +674,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
                       {/* Live Specs */}
                       <div
+                        className="drum-specs-grid"
                         style={{
                           display: 'grid',
                           gridTemplateColumns: 'repeat(3, 1fr)',
@@ -978,7 +983,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
           }}
         >
           {[
-            { step: '01', title: '1. Schedule a Pickup', desc: 'Book your laundry pickup online in 60 seconds or give us a quick call 24/7 at +91 9152233822.' },
+            { step: '01', title: '1. Schedule a Pickup', desc: `Book your laundry pickup online in 60 seconds or give us a quick call 24/7 at ${businessInfo.phone}.` },
             { step: '02', title: '2. We Collect Clothes', desc: 'Our friendly doorstep partner arrives at your chosen slot with sealed antimicrobial garment bags.' },
             { step: '03', title: '3. Expert Cleaning', desc: 'Garments are processed at our Malad East facility using eco-friendly solutions, individual wash cycles & steam form.' },
             { step: '04', title: '4. Doorstep Delivery', desc: 'Delivered back fresh, crisp, perfectly folded or hanger-packed right on time.' },
@@ -1337,7 +1342,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
             </button>
 
             <a
-              href="https://wa.me/919152233822"
+              href={`https://wa.me/${businessInfo.whatsappDigits}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -1355,7 +1360,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
               }}
             >
               <MessageSquare size={18} />
-              <span>WhatsApp: +91 9152233822</span>
+              <span>WhatsApp: {businessInfo.phone}</span>
             </a>
           </div>
         </div>
@@ -1382,6 +1387,33 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
           }
           #drum-right-card {
             grid-column: span 12 !important;
+          }
+        }
+        @media (max-width: 640px) {
+          #drum-theatre-box {
+            width: 96% !important;
+            height: 90vh !important;
+            border-radius: 22px !important;
+          }
+          #drum-stage-top {
+            padding: 16px 14px !important;
+          }
+          #drum-stage-bottom {
+            padding: 0 14px 18px 14px !important;
+          }
+          #drum-left-card > div {
+            padding: 16px 16px !important;
+            border-radius: 20px !important;
+          }
+          .drum-specs-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 6px !important;
+          }
+          .drum-specs-grid div div:first-child {
+            font-size: 0.62rem !important;
+          }
+          .drum-specs-grid div div:last-child {
+            font-size: 0.92rem !important;
           }
         }
       `}</style>

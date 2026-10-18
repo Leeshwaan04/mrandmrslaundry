@@ -15,6 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import businessInfo from '../../content/business-info.json';
 
 export default function BookingModal({ isOpen, onClose, initialData }) {
   const [step, setStep] = useState(1);
@@ -28,22 +29,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
 
-  const mumbaiLocalities = [
-    'Tardeo',
-    'Colaba / Cuffe Parade',
-    'Marine Drive',
-    'Worli',
-    'Lower Parel',
-    'Bandra West',
-    'Juhu',
-    'Andheri West',
-    'Malad East',
-    'Goregaon',
-    'Powai',
-    'Chembur',
-    'Navi Mumbai',
-    'Thane',
-  ];
+  const mumbaiLocalities = businessInfo.localities;
 
   const slots = [
     { id: 'slot1', time: 'Today, 2:00 PM – 4:00 PM', badge: 'Fastest Electric Slot' },
@@ -84,7 +70,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
       `📝 Notes: ${notes || 'Standard wash and care'}\n\n` +
       `Please confirm pickup schedule. Thank you!`
     );
-    window.open(`https://wa.me/919152233822?text=${text}`, '_blank', 'noopener,noreferrer');
+    window.open(`https://wa.me/${businessInfo.whatsappDigits}?text=${text}`, '_blank', 'noopener,noreferrer');
   };
 
   if (!isOpen) return null;
@@ -118,6 +104,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
 
         {/* Modal Window */}
         <motion.div
+          className="booking-modal-window"
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 20 }}
@@ -475,7 +462,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#86868b' }}>Customer Helpline:</span>
-                  <span style={{ color: '#30d158', fontWeight: 600 }}>+91 9152233822</span>
+                  <span style={{ color: '#30d158', fontWeight: 600 }}>{businessInfo.phone}</span>
                 </div>
               </div>
 
@@ -500,7 +487,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                   }}
                 >
                   <MessageSquare size={16} />
-                  <span>Send to WhatsApp (+91 9152233822)</span>
+                  <span>Send to WhatsApp ({businessInfo.phone})</span>
                 </button>
                 <button
                   type="button"
@@ -523,6 +510,15 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
           )}
         </motion.div>
       </div>
+
+      <style>{`
+        @media (max-width: 480px) {
+          .booking-modal-window {
+            padding: 24px 18px !important;
+            border-radius: 20px !important;
+          }
+        }
+      `}</style>
     </AnimatePresence>
   );
 }

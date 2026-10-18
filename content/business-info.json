@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "lastUpdated": "2026-10-18"
+  },
+  "phone": "+91 9152233822",
+  "phoneDigits": "919152233822",
+  "whatsapp": "+91 9152233822",
+  "whatsappDigits": "919152233822",
+  "email": "mrmrslaundry29@gmail.com",
+  "addresses": [
+    {
+      "id": "retail-store",
+      "label": "South Mumbai Storefront",
+      "line1": "Shop no. 3/4, No. 508, Ganjawala Tower, G-3, Sane Guruji Marg, Behind Suman Jewellers, Bane Compound, Tardeo, Mumbai - 400034.",
+      "locality": "Tardeo",
+      "city": "Mumbai"
+    },
+    {
+      "id": "processing-facility",
+      "label": "Central Processing Facility",
+      "line1": "Industrial Eco Laundry Hub, Malad East, Mumbai — our centralized, high-capacity processing facility equipped with German high-speed washers, ozone sanitization chambers, and a dedicated shoe spa lab.",
+      "locality": "Malad East",
+      "city": "Mumbai"
+    }
+  ],
+  "hours": {
+    "openDays": "Tue – Sun: 9:00 AM – 9:00 PM",
+    "closedDays": "Monday: Closed"
+  },
+  "localities": [
+    "Tardeo",
+    "Colaba / Cuffe Parade",
+    "Marine Drive",
+    "Worli",
+    "Lower Parel",
+    "Bandra West",
+    "Juhu",
+    "Andheri West",
+    "Malad East",
+    "Goregaon",
+    "Powai",
+    "Chembur",
+    "Navi Mumbai",
+    "Thane"
+  ],
+  "minOrderForFreeDelivery": 399
+}

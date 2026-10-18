@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import SplitVideoExperience from './components/SplitVideoExperience';
+import CottonJourneyScroll from './components/CottonJourneyScroll';
 import AboutPage from './components/AboutPage';
 import ServicesPage from './components/ServicesPage';
 import GalleryPage from './components/GalleryPage';
@@ -96,10 +97,13 @@ export default function App() {
       {/* Main Page Content View */}
       <main style={{ flex: 1 }}>
         {currentPage === 'home' && (
-          <SplitVideoExperience
-            onOpenBooking={handleOpenBooking}
-            onNavigate={handleNavigate}
-          />
+          <>
+            <SplitVideoExperience
+              onOpenBooking={handleOpenBooking}
+              onNavigate={handleNavigate}
+            />
+            <CottonJourneyScroll />
+          </>
         )}
         {currentPage === 'about' && (
           <AboutPage onOpenBooking={handleOpenBooking} />

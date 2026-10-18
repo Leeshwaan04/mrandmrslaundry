@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import businessInfo from '../../content/business-info.json';
 import {
   ShieldCheck,
   Award,
@@ -273,7 +274,7 @@ export default function AboutPage({ onOpenBooking }) {
                   Tardeo Service Store
                 </div>
                 <div style={{ fontSize: '0.88rem', color: '#86868b', lineHeight: 1.5 }}>
-                  Shop no. 3/4, No. 508, Ganjawala Tower, G-3, Sane Guruji Marg, Behind Suman Jewellers, Bane Compound, Tardeo, Mumbai - 400034.
+                  {businessInfo.addresses[0].line1}
                 </div>
               </div>
 
@@ -286,7 +287,7 @@ export default function AboutPage({ onOpenBooking }) {
                   Malad Processing Center
                 </div>
                 <div style={{ fontSize: '0.88rem', color: '#86868b', lineHeight: 1.5 }}>
-                  State-of-the-Art Eco Industrial Plant, Malad East, Mumbai. Equipped with German high-speed washers, ozone chambers &amp; shoe spa.
+                  {businessInfo.addresses[1].line1}
                 </div>
               </div>
 
@@ -296,10 +297,10 @@ export default function AboutPage({ onOpenBooking }) {
                   <span>Operating Timings</span>
                 </div>
                 <div style={{ fontSize: '0.88rem', color: '#86868b' }}>
-                  Tuesday to Sunday: <strong style={{ color: '#fff' }}>9:00 AM – 9:00 PM</strong>
+                  <strong style={{ color: '#fff' }}>{businessInfo.hours.openDays}</strong>
                 </div>
                 <div style={{ fontSize: '0.85rem', color: '#ff453a', marginTop: '2px' }}>
-                  Monday: Closed (Weekly Maintenance)
+                  {businessInfo.hours.closedDays}
                 </div>
               </div>
             </div>

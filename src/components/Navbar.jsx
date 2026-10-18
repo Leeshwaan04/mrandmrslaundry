@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import businessInfo from '../../content/business-info.json';
 import {
   Volume2,
   VolumeX,
@@ -73,7 +74,7 @@ export default function Navbar({
   // 8 Audited Core Services from https://mrandmrslaundry.com/
   const megaMenuServices = [
     { id: 'wash-fold', name: 'Wash & Fold Laundry', price: '₹99/Kg', desc: 'Everyday casual wear, sanitized & fold-packed', color: '#64d2ff' },
-    { id: 'wash-iron', name: 'Wash & Iron Laundry', price: '₹199/Kg', desc: 'Crisp industrial steam pressing ready to wear', color: '#2997ff' },
+    { id: 'wash-iron', name: 'Wash & Iron Laundry', price: '₹159/Kg', desc: 'Crisp industrial steam pressing ready to wear', color: '#2997ff' },
     { id: 'dry-cleaning', name: 'Dry Cleaning', price: 'Starts @ ₹99', desc: 'Suits, silk sarees, blazers & delicate fabrics', color: '#bf5af2' },
     { id: 'shoe-laundry', name: 'Shoe Laundry & Spa', price: 'Starts @ ₹299', desc: 'Sneakers, leather & suede revival & deodorization', color: '#ffd60a' },
     { id: 'express-laundry', name: 'Express Laundry (24h)', price: 'Starts @ ₹299/Kg', desc: 'Guaranteed 24-hour return right to your door', color: '#ff375f' },
@@ -95,8 +96,8 @@ export default function Navbar({
       { item: 'Top / Blouse', rate: '₹99' },
       { item: 'Kurti Plain', rate: '₹99' },
       { item: 'Saree Plain', rate: '₹199' },
-      { item: 'Gown Normal', rate: '₹149' },
-      { item: 'Lehenga Normal', rate: '₹249' },
+      { item: 'Gown Normal', rate: '₹249' },
+      { item: 'Lehenga Normal', rate: '₹299' },
     ],
     household: [
       { item: 'Towel / Mat Small', rate: '₹99' },
@@ -684,7 +685,7 @@ export default function Navbar({
                   {/* Direct Contact Links */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     <a
-                      href="tel:+919152233822"
+                      href={`tel:+${businessInfo.phoneDigits}`}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -698,11 +699,11 @@ export default function Navbar({
                       }}
                     >
                       <Phone size={13} color="#64d2ff" />
-                      <span>+91 9152233822 (Call 24/7)</span>
+                      <span>{businessInfo.phone} (Call 24/7)</span>
                     </a>
 
                     <a
-                      href="https://wa.me/919152233822"
+                      href={`https://wa.me/${businessInfo.whatsappDigits}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       style={{
@@ -723,7 +724,7 @@ export default function Navbar({
                     </a>
 
                     <a
-                      href="mailto:mrmrslaundry29@gmail.com"
+                      href={`mailto:${businessInfo.email}`}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -735,7 +736,7 @@ export default function Navbar({
                       }}
                     >
                       <Mail size={12} color="#a1a1a6" />
-                      <span>mrmrslaundry29@gmail.com</span>
+                      <span>{businessInfo.email}</span>
                     </a>
                   </div>
                 </div>
@@ -818,7 +819,7 @@ export default function Navbar({
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <div style={{ fontSize: '0.76rem', color: '#d1d1d6' }}>Wash &amp; Fold: <strong style={{ color: '#64d2ff' }}>₹99/Kg</strong></div>
-                  <div style={{ fontSize: '0.76rem', color: '#d1d1d6' }}>Wash &amp; Iron: <strong style={{ color: '#2997ff' }}>₹199/Kg</strong></div>
+                  <div style={{ fontSize: '0.76rem', color: '#d1d1d6' }}>Wash &amp; Iron: <strong style={{ color: '#2997ff' }}>₹159/Kg</strong></div>
                   <div style={{ fontSize: '0.76rem', color: '#d1d1d6' }}>Dry Cleaning: <strong style={{ color: '#bf5af2' }}>₹99+</strong></div>
                   <div style={{ fontSize: '0.76rem', color: '#d1d1d6' }}>Shoe Spa: <strong style={{ color: '#ffd60a' }}>₹299+</strong></div>
                 </div>
@@ -876,7 +877,7 @@ export default function Navbar({
 
               <div style={{ paddingTop: '4px', display: 'flex', gap: '10px' }}>
                 <a
-                  href="tel:+919152233822"
+                  href={`tel:+${businessInfo.phoneDigits}`}
                   style={{
                     flex: 1,
                     padding: '12px',
@@ -897,7 +898,7 @@ export default function Navbar({
                   <span>Call Us</span>
                 </a>
                 <a
-                  href="https://wa.me/919152233822"
+                  href={`https://wa.me/${businessInfo.whatsappDigits}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

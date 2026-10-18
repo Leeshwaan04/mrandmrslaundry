@@ -1,4 +1,5 @@
 import React from 'react';
+import businessInfo from '../../content/business-info.json';
 import {
   MapPin,
   Phone,
@@ -224,20 +225,20 @@ export default function Footer({ onNavigate, onOpenBooking, onOpenTrackOrder }) 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64d2ff', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>
                   <MapPin size={15} />
-                  <span>South Mumbai Storefront</span>
+                  <span>{businessInfo.addresses[0].label}</span>
                 </div>
                 <div style={{ fontSize: '0.85rem', color: '#86868b', lineHeight: 1.5 }}>
-                  Shop no. 3/4, No. 508, Ganjawala Tower, G-3, Sane Guruji Marg, Behind Suman Jewellers, Bane Compound, Tardeo, Mumbai - 400034.
+                  {businessInfo.addresses[0].line1}
                 </div>
               </div>
 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#bf5af2', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px' }}>
                   <MapPin size={15} />
-                  <span>Central Processing Plant</span>
+                  <span>{businessInfo.addresses[1].label}</span>
                 </div>
                 <div style={{ fontSize: '0.85rem', color: '#86868b', lineHeight: 1.5 }}>
-                  Industrial Eco Laundry Hub, Malad East, Mumbai.
+                  {businessInfo.addresses[1].line1}
                 </div>
               </div>
 
@@ -247,10 +248,10 @@ export default function Footer({ onNavigate, onOpenBooking, onOpenTrackOrder }) 
                   <span>Call &amp; WhatsApp Support</span>
                 </div>
                 <a
-                  href="tel:+919152233822"
+                  href={`tel:+${businessInfo.phoneDigits}`}
                   style={{ fontSize: '1.05rem', color: '#ffffff', fontWeight: 700, textDecoration: 'none' }}
                 >
-                  +91 9152233822
+                  {businessInfo.phone}
                 </a>
               </div>
 
@@ -260,10 +261,10 @@ export default function Footer({ onNavigate, onOpenBooking, onOpenTrackOrder }) 
                   <span>Official Email</span>
                 </div>
                 <a
-                  href="mailto:mrmrslaundry29@gmail.com"
+                  href={`mailto:${businessInfo.email}`}
                   style={{ fontSize: '0.95rem', color: '#ffffff', fontWeight: 600, textDecoration: 'none' }}
                 >
-                  mrmrslaundry29@gmail.com
+                  {businessInfo.email}
                 </a>
               </div>
 
@@ -273,8 +274,8 @@ export default function Footer({ onNavigate, onOpenBooking, onOpenTrackOrder }) 
                   <span>Store Hours</span>
                 </div>
                 <div style={{ fontSize: '0.84rem', color: '#86868b' }}>
-                  Tue to Sun: 9:00 AM – 9:00 PM <br />
-                  <span style={{ color: '#ff453a' }}>Monday: Closed</span>
+                  {businessInfo.hours.openDays} <br />
+                  <span style={{ color: '#ff453a' }}>{businessInfo.hours.closedDays}</span>
                 </div>
               </div>
             </div>
