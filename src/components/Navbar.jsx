@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import businessInfo from '../../content/business-info.json';
 import {
@@ -31,19 +31,10 @@ export default function Navbar({
   isAudioPlaying,
   onToggleAudio,
 }) {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMegaMenuOpen, setIsMegaMenuOpen] = useState(false);
   const [megaMenuTab, setMegaMenuTab] = useState('mens');
   const megaMenuTimeoutRef = useRef(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -117,10 +108,8 @@ export default function Navbar({
           left: 0,
           right: 0,
           zIndex: 100,
-          backgroundColor: scrolled ? 'rgba(8, 9, 13, 0.88)' : 'rgba(4, 5, 8, 0.72)',
-          backdropFilter: 'blur(24px) saturate(190%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(190%)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          backgroundColor: 'transparent',
+          borderBottom: 'none',
           transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
       >

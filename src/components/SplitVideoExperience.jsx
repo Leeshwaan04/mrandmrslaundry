@@ -209,7 +209,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
     <div style={{ backgroundColor: '#000000', color: '#f5f5f7', position: 'relative' }}>
       {/* ========================================================================= */}
       {/* 1. HERO SECTION — CONTINUOUS VIDEO PLAYBACK                               */}
-      {/* Video: Create_detailed_e2e_video_20261008222901.mp4                       */}
+      {/* Video: Laundry_commercial_combined.mp4 (web-optimized from 4K source)     */}
       {/* ========================================================================= */}
       <section
         id="hero-section"
@@ -236,7 +236,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
         >
           {/* Continuous Centerpiece Video */}
           <video
-            src="./videos/Create_detailed_e2e_video_20261008222901.mp4"
+            src="./videos/Laundry_commercial_combined.mp4"
             autoPlay
             loop
             muted
