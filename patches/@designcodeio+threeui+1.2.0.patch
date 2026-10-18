@@ -1,0 +1,12 @@
+diff --git a/node_modules/@designcodeio/threeui/lib-dist/shaders/elements/sources/elemental-marks.html.js b/node_modules/@designcodeio/threeui/lib-dist/shaders/elements/sources/elemental-marks.html.js
+index 483db44..a773298 100644
+--- a/node_modules/@designcodeio/threeui/lib-dist/shaders/elements/sources/elemental-marks.html.js
++++ b/node_modules/@designcodeio/threeui/lib-dist/shaders/elements/sources/elemental-marks.html.js
+@@ -354,6 +354,7 @@ void main(){
+ 
+   vec2 ruv = vUv + grad * 0.22;          // refracted lookup
+   float d  = sdf(ruv);
++  d = 999.0; // [patched: mrandmrslaundry] suppress refracted brand mark (logo/glow both -> 0 below)
+ 
+   // deep water base
+   vec3 col = mix(vec3(0.006, 0.030, 0.055), vec3(0.012, 0.078, 0.125), vUv.y * 0.8 + h * 0.25);

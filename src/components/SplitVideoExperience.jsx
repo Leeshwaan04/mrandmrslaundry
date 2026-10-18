@@ -19,7 +19,7 @@ import {
   Phone,
   MessageSquare
 } from 'lucide-react';
-import ElementalWaterBackground from './ElementalWaterBackground';
+import { ElementsCollection } from '@designcodeio/threeui';
 
 const DRUM_SEGMENTS = [
   {
@@ -249,7 +249,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
             }}
           />
 
-          {/* ThreeUI-Inspired Elemental Water Canvas (Zero external brand mark) */}
+          {/* ThreeUI Elemental Water Canvas (brand mark patched out — see patches/) */}
           <div
             className="shader-frame"
             style={{
@@ -261,7 +261,16 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
               pointerEvents: 'auto',
             }}
           >
-            <ElementalWaterBackground />
+            <ElementsCollection
+              variant="water"
+              speed={1.0}
+              size={1.0}
+              particleAmount={1.0}
+              hue={0}
+              saturation={1.0}
+              brightness={1.0}
+              opacity={1.0}
+            />
           </div>
 
           {/* Vignette & Gradients to ensure text pops cleanly */}
