@@ -40,6 +40,28 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
 
   const handleConfirmOrder = () => {
     setIsSubmitting(true);
+
+    // Record lead in browser cache so submissions are never lost
+    try {
+      const existing = JSON.parse(localStorage.getItem('mml_leads_cache') || '[]');
+      const newEntry = {
+        id: `MML-${Math.floor(1000 + Math.random() * 9000)}`,
+        customerName: customerName || 'Website Customer',
+        phone: phone || 'Not provided',
+        locality: locality || 'Tardeo',
+        address: address || '',
+        service: selectedService,
+        slot: selectedSlot,
+        notes: notes || '',
+        status: 'New Inquiry',
+        createdAt: new Date().toISOString(),
+        source: 'Website Booking Modal'
+      };
+      localStorage.setItem('mml_leads_cache', JSON.stringify([newEntry, ...existing]));
+    } catch (e) {
+      /* no-op */
+    }
+
     setTimeout(() => {
       setIsSubmitting(false);
       setIsConfirmed(true);

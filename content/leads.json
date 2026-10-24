@@ -1,0 +1,92 @@
+{
+  "_meta": {
+    "lastUpdated": "2026-10-25",
+    "description": "Mr & Mrs Laundry Customer Leads, Pickups and Inquiries Database"
+  },
+  "leads": [
+    {
+      "id": "MML-1042",
+      "customerName": "Rohan Mehta",
+      "phone": "+91 98201 44521",
+      "locality": "Tardeo",
+      "pincode": "400034",
+      "address": "Flat 14B, Ganjawala Tower, Tardeo",
+      "service": "Wash & Steam Iron (₹129/Kg)",
+      "slot": "Today, 2:00 PM – 4:00 PM",
+      "status": "In Wash",
+      "notes": "Separate white shirts, mild starch on collars",
+      "createdAt": "2026-10-24T14:30:00.000Z",
+      "source": "Website Booking Modal"
+    },
+    {
+      "id": "MML-1041",
+      "customerName": "Priyanka Sharma",
+      "phone": "+91 99302 88124",
+      "locality": "Bandra West",
+      "pincode": "400050",
+      "address": "Pali Hill, Near Zig Zag Road",
+      "service": "Designer Dry Cleaning",
+      "slot": "Tomorrow, 9:00 AM – 11:00 AM",
+      "status": "Pickup Scheduled",
+      "notes": "2 Silk Sarees and 1 Heavy Zari Lehenga",
+      "createdAt": "2026-10-24T18:15:00.000Z",
+      "source": "Bandra West Landing Page"
+    },
+    {
+      "id": "MML-1040",
+      "customerName": "Anand Shah",
+      "phone": "+91 98190 22319",
+      "locality": "Worli",
+      "pincode": "400018",
+      "address": "Century Bazaar, Dr Annie Besant Rd",
+      "service": "Wash & Fold (₹99/Kg)",
+      "slot": "Today, 6:00 PM – 8:00 PM",
+      "status": "Delivered",
+      "notes": "Regular family weekly laundry ~6kg",
+      "createdAt": "2026-10-23T11:20:00.000Z",
+      "source": "Website Booking Modal"
+    },
+    {
+      "id": "MML-1039",
+      "customerName": "Vikram Singhania",
+      "phone": "+91 98211 90432",
+      "locality": "Lower Parel",
+      "pincode": "400013",
+      "address": "Phoenix Towers, Senapati Bapat Marg",
+      "service": "Executive Suit Dry Cleaning",
+      "slot": "Yesterday, 3:00 PM",
+      "status": "Delivered",
+      "notes": "3 Charcoal blazers & trousers for corporate conference",
+      "createdAt": "2026-10-23T09:45:00.000Z",
+      "source": "WhatsApp Direct Lead"
+    },
+    {
+      "id": "MML-1038",
+      "customerName": "Sneha Deshmukh",
+      "phone": "+91 97692 11048",
+      "locality": "Malad East",
+      "pincode": "400097",
+      "address": "Pushpa Park, Near Kurar Village",
+      "service": "Heavy Curtain & Quilt Care",
+      "slot": "Today, 4:00 PM",
+      "status": "In Wash",
+      "notes": "2 Double-bed winter duvets and living room drapes",
+      "createdAt": "2026-10-24T16:00:00.000Z",
+      "source": "Malad East Facility Walk-in"
+    },
+    {
+      "id": "MML-1037",
+      "customerName": "Karan Kapoor",
+      "phone": "+91 98205 77610",
+      "locality": "Powai",
+      "pincode": "400076",
+      "address": "Hiranandani Gardens, Somerset Bldg",
+      "service": "Sneaker & Shoe Spa",
+      "slot": "Tomorrow, 1:00 PM – 3:00 PM",
+      "status": "New Inquiry",
+      "notes": "Nike Jordan sole restoration & Adidas knit cleaning",
+      "createdAt": "2026-10-25T02:10:00.000Z",
+      "source": "Powai Landing Page"
+    }
+  ]
+}
