@@ -20,25 +20,38 @@ export default function App() {
 
   const audioRef = useRef(null);
 
-  // Sync with browser hash routing (e.g. #about, #services, #gallery, #contact, #easereverse)
+  // Sync with browser routing (pathname, hash, or query parameters)
   useEffect(() => {
-    const handleHashChange = () => {
+    const syncRoute = () => {
+      // 1. Check hash (e.g. #services, #about, #contact)
       const hash = window.location.hash.replace('#', '').toLowerCase();
-      if (['home', 'about', 'services', 'gallery', 'contact', 'easereverse', 'gsap'].includes(hash)) {
-        setCurrentPage(hash === 'gsap' ? 'easereverse' : hash);
-      } else if (hash === 'track') {
+      
+      // 2. Check pathname (e.g. /services, /about, /contact, /gallery, /track, /book)
+      const path = window.location.pathname.replace(/^\/|\/$/g, '').toLowerCase();
+      
+      // 3. Check query param (e.g. ?p=services or ?/services)
+      const searchParams = new URLSearchParams(window.location.search);
+      const queryRoute = searchParams.get('p') || searchParams.get('page');
+
+      const target = hash || (path && path !== 'mrandmrslaundry' ? path : '') || queryRoute;
+
+      if (['home', 'about', 'services', 'gallery', 'contact', 'easereverse', 'gsap'].includes(target)) {
+        setCurrentPage(target === 'gsap' ? 'easereverse' : target);
+      } else if (target === 'track') {
         setIsTrackOrderOpen(true);
-      } else if (hash === 'book') {
+      } else if (target === 'book') {
         setIsBookingOpen(true);
       }
     };
 
-    if (window.location.hash) {
-      handleHashChange();
-    }
+    syncRoute();
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', syncRoute);
+    window.addEventListener('popstate', syncRoute);
+    return () => {
+      window.removeEventListener('hashchange', syncRoute);
+      window.removeEventListener('popstate', syncRoute);
+    };
   }, []);
 
   const handleNavigate = (pageId) => {

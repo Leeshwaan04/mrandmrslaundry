@@ -1,0 +1,11 @@
+# Robots.txt for Mr and Mrs Laundry
+# https://mrandmrslaundry.com
+
+User-agent: *
+Allow: /
+
+# Canonical Sitemap
+Sitemap: https://mrandmrslaundry.com/sitemap.xml
+
+# Host
+Host: https://mrandmrslaundry.com
