@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "generate:pseo": "node scripts/generate-pseo.js",
+    "build": "node scripts/generate-pseo.js && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "postinstall": "patch-package"
