@@ -36,6 +36,12 @@ const MUMBAI_LOCALITIES = [
   'Ghatkopar',
   'Thane West',
   'Vashi (Navi Mumbai)',
+  // The exact strings the public site's booking form offers (content/business-info.json)
+  // so a lead transcribed from a WhatsApp message can match what the customer actually picked.
+  'Colaba / Cuffe Parade',
+  'Goregaon',
+  'Navi Mumbai',
+  'Thane',
   'Other / Mumbai Unspecified'
 ];
 
@@ -47,7 +53,17 @@ const SERVICES = [
   'Silk Saree & Lehenga Care',
   'Sneaker & Shoe Spa (₹299+)',
   'Heavy Curtain & Quilt Care (₹349+)',
-  'Express 24-Hour Laundry'
+  'Express 24-Hour Laundry',
+  // The exact option values shown on the public booking form / contact page, so a lead
+  // transcribed from WhatsApp can be logged with the service the customer actually selected.
+  'Wash & Fold Laundry (₹99/Kg)',
+  'Wash & Iron Laundry (₹159/Kg)',
+  'Dry Cleaning (Starts @ ₹99)',
+  'Shoe Laundry & Spa (Starts @ ₹299)',
+  'Express 24h Laundry (₹299/Kg)',
+  'Premium Garment Care (₹199/Kg)',
+  'Heavy Laundry & Quilts (₹159/Kg)',
+  'Curtain & Drapery Care'
 ];
 
 const STATUS_OPTIONS = [
@@ -57,6 +73,23 @@ const STATUS_OPTIONS = [
   'Delivered',
   'Cancelled'
 ];
+
+// Timestamp-derived so a concurrent admin add can't collide — collision-free as long as
+// two leads aren't added in the exact same millisecond from the exact same browser tab.
+function generateLeadId(existingLeads) {
+  const candidate = `MML-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 36).toString(36).toUpperCase()}`;
+  const taken = new Set(existingLeads.map((l) => l.id));
+  return taken.has(candidate) ? `${candidate}X` : candidate;
+}
+
+// Guards against CSV/formula injection (CWE-1236): Excel/Sheets treats a cell starting
+// with =, +, -, or @ as a formula regardless of surrounding quotes, so every phone number
+// (which starts with "+") would otherwise open as a broken formula on every export.
+function sanitizeCsvField(value) {
+  const str = String(value ?? '');
+  const guarded = /^[=+\-@\t\r]/.test(str) ? `'${str}` : str;
+  return `"${guarded.replace(/"/g, '""')}"`;
+}
 
 export default function LeadsManager({ onBack, onAuthError }) {
   const [loading, setLoading] = useState(true);
@@ -78,6 +111,7 @@ export default function LeadsManager({ onBack, onAuthError }) {
     customerName: '',
     phone: '',
     locality: 'Tardeo',
+    pincode: '',
     address: '',
     service: 'Wash & Fold (₹99/Kg)',
     slot: 'Today, 2:00 PM – 4:00 PM',
@@ -126,7 +160,7 @@ export default function LeadsManager({ onBack, onAuthError }) {
     }
 
     const createdLead = {
-      id: `MML-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: generateLeadId(leads),
       ...newLead,
       createdAt: new Date().toISOString(),
       source: 'Admin / Phone Inflow'
@@ -138,6 +172,7 @@ export default function LeadsManager({ onBack, onAuthError }) {
       customerName: '',
       phone: '',
       locality: 'Tardeo',
+      pincode: '',
       address: '',
       service: 'Wash & Fold (₹99/Kg)',
       slot: 'Today, 2:00 PM – 4:00 PM',
@@ -147,6 +182,9 @@ export default function LeadsManager({ onBack, onAuthError }) {
   };
 
   const handleSaveToGitHub = async () => {
+    if (!window.confirm('Publish these changes to the live leads database now? This commits directly to production.')) {
+      return;
+    }
     setSaving(true);
     setError('');
     setStatus('');
@@ -175,19 +213,20 @@ export default function LeadsManager({ onBack, onAuthError }) {
 
   const handleExportCSV = () => {
     if (!leads.length) return alert('No leads to export.');
-    const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Locality', 'Address', 'Service', 'Slot', 'Status', 'Notes', 'Source'];
+    const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Locality', 'Pincode', 'Address', 'Service', 'Slot', 'Status', 'Notes', 'Source'];
     const rows = leads.map((l) => [
-      `"${l.id || ''}"`,
-      `"${l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-IN') : ''}"`,
-      `"${(l.customerName || '').replace(/"/g, '""')}"`,
-      `"${(l.phone || '').replace(/"/g, '""')}"`,
-      `"${(l.locality || '').replace(/"/g, '""')}"`,
-      `"${(l.address || '').replace(/"/g, '""')}"`,
-      `"${(l.service || '').replace(/"/g, '""')}"`,
-      `"${(l.slot || '').replace(/"/g, '""')}"`,
-      `"${(l.status || '').replace(/"/g, '""')}"`,
-      `"${(l.notes || '').replace(/"/g, '""')}"`,
-      `"${(l.source || '').replace(/"/g, '""')}"`
+      sanitizeCsvField(l.id),
+      sanitizeCsvField(l.createdAt ? new Date(l.createdAt).toLocaleDateString('en-IN') : ''),
+      sanitizeCsvField(l.customerName),
+      sanitizeCsvField(l.phone),
+      sanitizeCsvField(l.locality),
+      sanitizeCsvField(l.pincode),
+      sanitizeCsvField(l.address),
+      sanitizeCsvField(l.service),
+      sanitizeCsvField(l.slot),
+      sanitizeCsvField(l.status),
+      sanitizeCsvField(l.notes),
+      sanitizeCsvField(l.source)
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -207,6 +246,28 @@ export default function LeadsManager({ onBack, onAuthError }) {
     neighborhoodCounts[loc] = (neighborhoodCounts[loc] || 0) + 1;
   });
   const sortedNeighborhoods = Object.entries(neighborhoodCounts).sort((a, b) => b[1] - a[1]);
+
+  // Leads Per Day (last 14 days) — relies on every lead having a createdAt, so this is only
+  // as accurate as staff are disciplined about logging walk-in/phone leads the same day.
+  const DAYS_TO_SHOW = 14;
+  const dailyCounts = [];
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  for (let i = DAYS_TO_SHOW - 1; i >= 0; i--) {
+    const day = new Date(todayStart);
+    day.setDate(day.getDate() - i);
+    const key = day.toISOString().slice(0, 10);
+    dailyCounts.push({ key, label: day.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }), count: 0 });
+  }
+  const dailyCountsByKey = Object.fromEntries(dailyCounts.map((d) => [d.key, d]));
+  leads.forEach((l) => {
+    if (!l.createdAt) return;
+    const key = l.createdAt.slice(0, 10);
+    if (dailyCountsByKey[key]) dailyCountsByKey[key].count += 1;
+  });
+  const maxDailyCount = Math.max(1, ...dailyCounts.map((d) => d.count));
+  const last7 = dailyCounts.slice(-7).reduce((sum, d) => sum + d.count, 0);
+  const avgPerDay = (last7 / 7).toFixed(1);
 
   // Filtered Leads
   const filteredLeads = leads.filter((l) => {
@@ -315,6 +376,38 @@ export default function LeadsManager({ onBack, onAuthError }) {
           </div>
         </div>
 
+        {/* Leads Per Day Trend */}
+        <div style={{ ...card, padding: '16px 20px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ fontSize: '0.78rem', color: colors.textDim, fontWeight: 700, textTransform: 'uppercase' }}>
+              Leads Logged Per Day (Last {DAYS_TO_SHOW} Days)
+            </div>
+            <div style={{ fontSize: '0.8rem', color: colors.textDim }}>
+              Avg last 7 days: <strong style={{ color: '#fff' }}>{avgPerDay}/day</strong>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px', height: '90px' }}>
+            {dailyCounts.map((d) => (
+              <div key={d.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', height: '100%' }} title={`${d.label}: ${d.count} lead${d.count === 1 ? '' : 's'}`}>
+                <div style={{ fontSize: '0.68rem', color: colors.textDim, marginBottom: '4px' }}>{d.count || ''}</div>
+                <div
+                  style={{
+                    width: '100%',
+                    maxWidth: '26px',
+                    height: `${Math.max(4, (d.count / maxDailyCount) * 56)}px`,
+                    background: d.count ? colors.accent : 'rgba(255,255,255,0.08)',
+                    borderRadius: '4px 4px 0 0'
+                  }}
+                />
+                <div style={{ fontSize: '0.62rem', color: colors.textDim, marginTop: '6px', whiteSpace: 'nowrap' }}>{d.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: colors.textDim, marginTop: '14px' }}>
+            ⚠️ Only reflects leads actually logged into this ledger (via "Log New Walk-in / Phone Lead" or a saved edit) — WhatsApp/call inquiries that staff haven't transcribed yet won't show here.
+          </div>
+        </div>
+
         {/* Search & Filters */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
           <input
@@ -404,6 +497,15 @@ export default function LeadsManager({ onBack, onAuthError }) {
                       </option>
                     ))}
                   </select>
+                </div>
+                <div>
+                  <label style={label}>Pincode</label>
+                  <input
+                    style={input}
+                    placeholder="e.g. 400034"
+                    value={newLead.pincode}
+                    onChange={(e) => setNewLead({ ...newLead, pincode: e.target.value })}
+                  />
                 </div>
               </div>
 
@@ -504,7 +606,7 @@ export default function LeadsManager({ onBack, onAuthError }) {
 
                     {lead.address && (
                       <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginBottom: '4px' }}>
-                        🏠 {lead.address}
+                        🏠 {lead.address}{lead.pincode ? ` — ${lead.pincode}` : ''}
                       </div>
                     )}
 
@@ -563,6 +665,11 @@ export default function LeadsManager({ onBack, onAuthError }) {
                       value={lead.status}
                       onChange={(e) => handleStatusChange(lead.id, e.target.value)}
                     >
+                      {/* If a lead's stored status isn't one of the known options (e.g. hand-edited
+                          JSON), surface it as its own option instead of silently showing the wrong one. */}
+                      {!STATUS_OPTIONS.includes(lead.status) && lead.status && (
+                        <option value={lead.status}>{lead.status} (unrecognized)</option>
+                      )}
                       {STATUS_OPTIONS.map((st) => (
                         <option key={st} value={st}>
                           {st}
@@ -590,3 +697,4 @@ export default function LeadsManager({ onBack, onAuthError }) {
     </div>
   );
 }
+

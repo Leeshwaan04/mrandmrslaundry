@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import businessInfo from '../../content/business-info.json';
+import { trackEvent } from '../analytics';
 import {
   MapPin,
   Phone,
@@ -29,6 +30,29 @@ export default function ContactPage({ onOpenBooking }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Record lead in browser cache so submissions are never lost (mirrors BookingModal.jsx)
+    try {
+      const existing = JSON.parse(localStorage.getItem('mml_leads_cache') || '[]');
+      const newEntry = {
+        id: `MML-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 36).toString(36).toUpperCase()}`,
+        customerName: formData.name.trim(),
+        phone: formData.phone.trim(),
+        locality: formData.locality.trim() || 'Not specified',
+        address: '',
+        service: formData.service,
+        slot: 'To be confirmed',
+        notes: formData.message || '',
+        status: 'New Inquiry',
+        createdAt: new Date().toISOString(),
+        source: 'Contact Page Form'
+      };
+      localStorage.setItem('mml_leads_cache', JSON.stringify([newEntry, ...existing]));
+    } catch (err) {
+      /* no-op */
+    }
+
+    trackEvent('contact_form_submitted', { service: formData.service, locality: formData.locality });
     setSubmitted(true);
   };
 
@@ -426,7 +450,7 @@ export default function ContactPage({ onOpenBooking }) {
                     <option value="Shoe Laundry & Spa (Starts @ ₹299)">Shoe Laundry &amp; Spa (Starts @ ₹299)</option>
                     <option value="Express 24h Laundry (₹299/Kg)">Express 24h Laundry (₹299/Kg)</option>
                     <option value="Premium Garment Care (₹199/Kg)">Premium Garment Care (₹199/Kg)</option>
-                    <option value="Heavy Laundry / Blankets (₹159/Kg)">Heavy Laundry / Blankets (₹159/Kg)</option>
+                    <option value="Heavy Laundry & Quilts (₹159/Kg)">Heavy Laundry &amp; Quilts (₹159/Kg)</option>
                     <option value="Curtain & Drapery Care">Curtain &amp; Drapery Care</option>
                   </select>
                 </div>

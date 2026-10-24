@@ -4,8 +4,10 @@
 User-agent: *
 Allow: /
 
-# Canonical Sitemap
+# Sitemaps (sitemap.xml is the comprehensive one; the other two are segmented for tracking)
 Sitemap: https://mrandmrslaundry.com/sitemap.xml
+Sitemap: https://mrandmrslaundry.com/sitemap-main.xml
+Sitemap: https://mrandmrslaundry.com/sitemap-locations.xml
 
 # Host
 Host: https://mrandmrslaundry.com

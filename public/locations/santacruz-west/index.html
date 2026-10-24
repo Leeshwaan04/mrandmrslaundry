@@ -5,6 +5,29 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-P38X3JKJ');</script>
+    <!-- End Google Tag Manager -->
+    <script>
+      // Sitewide click tracking, pushed to the dataLayer — attach a GA4 Event tag in GTM
+      // to a Custom Event trigger named "whatsapp_click" / "call_click" to forward these.
+      window.dataLayer = window.dataLayer || [];
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (href.indexOf('wa.me') !== -1) {
+          window.dataLayer.push({ event: 'whatsapp_click', page_path: '/locations/santacruz-west/' });
+        } else if (href.indexOf('tel:') === 0) {
+          window.dataLayer.push({ event: 'call_click', page_path: '/locations/santacruz-west/' });
+        }
+      });
+    </script>
+
     <!-- Localized SEO Title & Meta -->
     <title>Best Laundry & Dry Clean in Santacruz West | Wash & Fold ₹99/Kg | Mr & Mrs Laundry</title>
     <meta name="description" content="Doorstep laundry & dry cleaning in Santacruz West, Mumbai (400054). 100% individual drums, ₹99/Kg wash & fold, Italian steam iron & 24h express delivery. Book online or WhatsApp +91 9152233822!" />
@@ -34,156 +57,132 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- JSON-LD Structured Data: LocalBusiness / DryCleaningOrLaundry -->
+    <!-- JSON-LD Structured Data: Service (provided by the real LocalBusiness, see index.html) -->
     <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
     {
-      "@context": "https://schema.org",
-      "@graph": [
+      "@type": "Service",
+      "@id": "https://mrandmrslaundry.com/locations/santacruz-west/#service",
+      "name": "Doorstep Laundry & Dry Cleaning Pickup — Santacruz West",
+      "serviceType": "Laundry and Dry Cleaning Pickup & Delivery",
+      "url": "https://mrandmrslaundry.com/locations/santacruz-west/",
+      "provider": {
+        "@id": "https://mrandmrslaundry.com/#localbusiness"
+      },
+      "areaServed": {
+        "@type": "Place",
+        "name": "Santacruz West",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Santacruz West",
+          "addressRegion": "Maharashtra",
+          "postalCode": "400054",
+          "addressCountry": "IN"
+        }
+      },
+      "offers": {
+        "@type": "OfferCatalog",
+        "name": "Laundry & Dry Cleaning Rates in Santacruz West",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Wash & Fold (Santacruz West)",
+              "description": "Daily garments sanitized in 100% individual drum wash, tumble dried and folded."
+            },
+            "price": "99",
+            "priceCurrency": "INR"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Wash & Steam Iron (Santacruz West)",
+              "description": "Full wash cycle with wrinkle-free high pressure Italian steam pressing."
+            },
+            "price": "129",
+            "priceCurrency": "INR"
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Designer Dry Cleaning (Santacruz West)",
+              "description": "Hydrocarbon eco dry cleaning for suits, lehengas, silk sarees and blazers."
+            },
+            "price": "199",
+            "priceCurrency": "INR"
+          }
+        ]
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://mrandmrslaundry.com/locations/santacruz-west/#breadcrumbs",
+      "itemListElement": [
         {
-          "@type": ["DryCleaningOrLaundry", "LocalBusiness"],
-          "@id": "https://mrandmrslaundry.com/locations/santacruz-west/#localbusiness",
-          "name": "Mr & Mrs Laundry - Santacruz West",
-          "alternateName": "Mr & Mrs Laundry Santacruz West Doorstep Pickup",
-          "url": "https://mrandmrslaundry.com/locations/santacruz-west/",
-          "telephone": "+91 9152233822",
-          "email": "mrmrslaundry29@gmail.com",
-          "priceRange": "₹99 - ₹499",
-          "currenciesAccepted": "INR",
-          "paymentAccepted": "Cash, UPI, Credit Card, Debit Card, Net Banking",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "Willingdon Gymkhana, Santacruz West",
-            "addressLocality": "Mumbai",
-            "addressRegion": "Maharashtra",
-            "postalCode": "400054",
-            "addressCountry": "IN"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": 19.0833,
-            "longitude": 72.8367
-          },
-          "openingHoursSpecification": [
-            {
-              "@type": "OpeningHoursSpecification",
-              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-              "opens": "08:00",
-              "closes": "22:00"
-            }
-          ],
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "520",
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "areaServed": [
-            { "@type": "City", "name": "Mumbai" },
-            { "@type": "AdministrativeArea", "name": "Santacruz West" },
-            { "@type": "AdministrativeArea", "name": "Western Suburbs" }
-          ],
-          "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "Laundry & Dry Cleaning Rates in Santacruz West",
-            "itemListElement": [
-              {
-                "@type": "Offer",
-                "itemOffered": {
-                  "@type": "Service",
-                  "name": "Wash & Fold (Santacruz West)",
-                  "description": "Daily garments sanitized in 100% individual drum wash, tumble dried and folded."
-                },
-                "price": "99",
-                "priceCurrency": "INR"
-              },
-              {
-                "@type": "Offer",
-                "itemOffered": {
-                  "@type": "Service",
-                  "name": "Wash & Steam Iron (Santacruz West)",
-                  "description": "Full wash cycle with wrinkle-free high pressure Italian steam pressing."
-                },
-                "price": "129",
-                "priceCurrency": "INR"
-              },
-              {
-                "@type": "Offer",
-                "itemOffered": {
-                  "@type": "Service",
-                  "name": "Designer Dry Cleaning (Santacruz West)",
-                  "description": "Hydrocarbon eco dry cleaning for suits, lehengas, silk sarees and blazers."
-                },
-                "price": "199",
-                "priceCurrency": "INR"
-              }
-            ]
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://mrandmrslaundry.com/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Mumbai Locations",
+          "item": "https://mrandmrslaundry.com/locations/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Santacruz West",
+          "item": "https://mrandmrslaundry.com/locations/santacruz-west/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://mrandmrslaundry.com/locations/santacruz-west/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Do you provide free doorstep laundry pickup in Santacruz West?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! Mr & Mrs Laundry provides daily doorstep pickup and delivery across Santacruz West (400054). Pickup and delivery is completely free on orders of ₹399 and above."
           }
         },
         {
-          "@type": "BreadcrumbList",
-          "@id": "https://mrandmrslaundry.com/locations/santacruz-west/#breadcrumbs",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "https://mrandmrslaundry.com/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Mumbai Locations",
-              "item": "https://mrandmrslaundry.com/locations/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "Santacruz West",
-              "item": "https://mrandmrslaundry.com/locations/santacruz-west/"
-            }
-          ]
+          "@type": "Question",
+          "name": "How much does laundry cost per kg in Santacruz West?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Our Wash & Fold service starts at just ₹99/Kg, and Wash & Steam Iron is ₹129/Kg. All garments are washed in dedicated individual drums with hospital-grade sanitization."
+          }
         },
         {
-          "@type": "FAQPage",
-          "@id": "https://mrandmrslaundry.com/locations/santacruz-west/#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Do you provide free doorstep laundry pickup in Santacruz West?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes! Mr & Mrs Laundry provides daily doorstep pickup and delivery across Santacruz West (400054). Pickup and delivery is completely free on orders of ₹399 and above."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How much does laundry cost per kg in Santacruz West?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Our Wash & Fold service starts at just ₹99/Kg, and Wash & Steam Iron is ₹129/Kg. All garments are washed in dedicated individual drums with hospital-grade sanitization."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What landmarks in Santacruz West do you cover?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "We cover all major landmarks across Santacruz West including Willingdon Gymkhana, Tagore Road, Podar International School, Juhu Tara Road Junction, Hasnabad and surrounding societies."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What are your pickup timings for Santacruz West?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "We operate two convenient pickup and delivery shifts in Santacruz West: Morning: 8:30 AM - 12:00 PM and Evening: 5:30 PM - 9:30 PM. Express 24-hour turnaround is also available upon request."
-              }
-            }
-          ]
+          "@type": "Question",
+          "name": "What landmarks in Santacruz West do you cover?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We cover all major landmarks across Santacruz West including Willingdon Gymkhana, Tagore Road, Podar International School, Juhu Tara Road Junction, Hasnabad and surrounding societies."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are your pickup timings for Santacruz West?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "We operate two convenient pickup and delivery shifts in Santacruz West: Morning: 8:30 AM - 12:00 PM and Evening: 5:30 PM - 9:30 PM. Express 24-hour turnaround is also available upon request."
+          }
         }
       ]
     }
+  ]
+}
     </script>
 
     <style>
@@ -419,6 +418,11 @@
     </style>
   </head>
   <body>
+    
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P38X3JKJ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <!-- Top Navigation -->
     <header>
       <div class="container nav-row">

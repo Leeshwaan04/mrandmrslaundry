@@ -4,7 +4,34 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-    
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-P38X3JKJ');</script>
+    <!-- End Google Tag Manager -->
+
+    <script>
+      // Sitewide click tracking for every "Call Now" / WhatsApp CTA, including ones added
+      // later, without having to wire each button individually. Pushed to the dataLayer so
+      // any GTM tag (GA4 Event tag, Ads conversion, etc.) can pick these up via a Custom
+      // Event trigger named "whatsapp_click" / "call_click" — no code change needed to wire
+      // a new destination later.
+      window.dataLayer = window.dataLayer || [];
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (href.indexOf('wa.me') !== -1) {
+          window.dataLayer.push({ event: 'whatsapp_click', page_path: window.location.pathname });
+        } else if (href.indexOf('tel:') === 0) {
+          window.dataLayer.push({ event: 'call_click', page_path: window.location.pathname });
+        }
+      });
+    </script>
+
     <!-- High-CTR SEO Title & Meta -->
     <title>Mr &amp; Mrs Laundry Mumbai | Wash &amp; Fold ₹99/Kg | Free Doorstep Pickup</title>
     <meta name="description" content="Mumbai’s trusted laundry &amp; dry clean service since 2012. Wash &amp; fold from ₹99/Kg, 100% individual wash drums, 24/7 doorstep pickup across Mumbai, Thane &amp; Navi Mumbai. Book online or WhatsApp +91 9152233822!" />
@@ -247,6 +274,11 @@
     </script>
   </head>
   <body class="bg-black text-white antialiased selection:bg-blue-600 selection:text-white">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P38X3JKJ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <!-- Semantic Noscript Crawl Fallback for Search Engines & Non-JS Clients -->
     <noscript>
       <header style="background: #09090b; padding: 20px; text-align: center; border-bottom: 1px solid #27272a;">

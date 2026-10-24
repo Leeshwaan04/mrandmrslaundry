@@ -47,6 +47,9 @@ jobs:
         run: npm run build
         working-directory: ./admin
 
+      - name: Verify admin build landed inside main dist
+        run: test -f ./dist/admin/index.html || (echo "::error::dist/admin/index.html is missing — main site build likely ran after the admin build and wiped it (emptyOutDir). Check step order above." && exit 1)
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

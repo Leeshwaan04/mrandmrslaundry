@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -16,20 +16,34 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import businessInfo from '../../content/business-info.json';
+import { trackEvent } from '../analytics';
+
+// Timestamp-derived so IDs only repeat if two bookings land in the same millisecond.
+function generateLeadId() {
+  return `MML-${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 36).toString(36).toUpperCase()}`;
+}
 
 export default function BookingModal({ isOpen, onClose, initialData }) {
   const [step, setStep] = useState(1);
   const [customerName, setCustomerName] = useState('');
   const [phone, setPhone] = useState('');
-  const [locality, setLocality] = useState('Tardeo, South Mumbai');
+  const [locality, setLocality] = useState('Tardeo');
   const [address, setAddress] = useState('');
   const [selectedService, setSelectedService] = useState(initialData?.service || 'Wash & Fold Laundry (₹99/Kg)');
   const [selectedSlot, setSelectedSlot] = useState('Today, 2:00 PM – 4:00 PM');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [orderId, setOrderId] = useState('');
+  const [step1Error, setStep1Error] = useState('');
+  const [step2Error, setStep2Error] = useState('');
 
   const mumbaiLocalities = businessInfo.localities;
+
+  useEffect(() => {
+    if (isOpen) trackEvent('booking_modal_opened', { initial_service: initialData?.service || 'none' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const slots = [
     { id: 'slot1', time: 'Today, 2:00 PM – 4:00 PM', badge: 'Fastest Electric Slot' },
@@ -39,17 +53,24 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
   ];
 
   const handleConfirmOrder = () => {
+    if (!address.trim()) {
+      setStep2Error('Please enter your address so our team can reach your doorstep.');
+      return;
+    }
+    setStep2Error('');
     setIsSubmitting(true);
+
+    const newOrderId = generateLeadId();
 
     // Record lead in browser cache so submissions are never lost
     try {
       const existing = JSON.parse(localStorage.getItem('mml_leads_cache') || '[]');
       const newEntry = {
-        id: `MML-${Math.floor(1000 + Math.random() * 9000)}`,
-        customerName: customerName || 'Website Customer',
-        phone: phone || 'Not provided',
+        id: newOrderId,
+        customerName: customerName.trim(),
+        phone: phone.trim(),
         locality: locality || 'Tardeo',
-        address: address || '',
+        address: address.trim(),
         service: selectedService,
         slot: selectedSlot,
         notes: notes || '',
@@ -61,6 +82,14 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
     } catch (e) {
       /* no-op */
     }
+
+    setOrderId(newOrderId);
+    trackEvent('booking_confirmed', {
+      order_id: newOrderId,
+      service: selectedService,
+      locality: locality,
+      slot: selectedSlot
+    });
 
     setTimeout(() => {
       setIsSubmitting(false);
@@ -74,15 +103,33 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
     }, 900);
   };
 
+  const handleProceedToAddress = () => {
+    if (!customerName.trim() || !phone.trim()) {
+      setStep1Error('Please enter your name and phone number so we can confirm your pickup.');
+      return;
+    }
+    if (phone.replace(/\D/g, '').length < 10) {
+      setStep1Error('Please enter a valid 10-digit phone/WhatsApp number.');
+      return;
+    }
+    setStep1Error('');
+    setStep(2);
+  };
+
   const handleReset = () => {
     setIsConfirmed(false);
     setStep(1);
+    setOrderId('');
+    setStep1Error('');
+    setStep2Error('');
     onClose();
   };
 
   const openWhatsAppConfirmation = () => {
+    trackEvent('booking_whatsapp_sent', { order_id: orderId, locality: locality });
     const text = encodeURIComponent(
       `*New Mr & Mrs Laundry Booking Request*\n` +
+      `🔖 Order ID: ${orderId || 'N/A'}\n` +
       `👤 Name: ${customerName || 'Customer'}\n` +
       `📞 Phone: ${phone || 'Not provided'}\n` +
       `📍 Locality: ${locality}\n` +
@@ -316,9 +363,12 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                     </div>
                   </div>
 
+                  {step1Error && (
+                    <div style={{ color: '#ff6961', fontSize: '0.8rem', marginBottom: '12px' }}>{step1Error}</div>
+                  )}
                   <button
                     type="button"
-                    onClick={() => setStep(2)}
+                    onClick={handleProceedToAddress}
                     style={{
                       width: '100%',
                       padding: '14px',
@@ -345,7 +395,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                   {/* Step 2: Address & Access details */}
                   <div style={{ marginBottom: '18px' }}>
                     <label style={{ fontSize: '0.78rem', color: '#86868b', display: 'block', marginBottom: '6px' }}>
-                      EXACT BUILDING / FLAT / ROAD ADDRESS:
+                      EXACT BUILDING / FLAT / ROAD ADDRESS: *
                     </label>
                     <input
                       type="text"
@@ -355,6 +405,9 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
                       style={{ width: '100%' }}
                     />
                   </div>
+                  {step2Error && (
+                    <div style={{ color: '#ff6961', fontSize: '0.8rem', marginTop: '-10px', marginBottom: '16px' }}>{step2Error}</div>
+                  )}
 
                   <div style={{ marginBottom: '22px' }}>
                     <label style={{ fontSize: '0.78rem', color: '#86868b', display: 'block', marginBottom: '6px' }}>
@@ -476,7 +529,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ color: '#86868b' }}>Order Number:</span>
-                  <span style={{ color: '#64d2ff', fontWeight: 700 }}>MML-9842</span>
+                  <span style={{ color: '#64d2ff', fontWeight: 700 }}>{orderId || '—'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ color: '#86868b' }}>Assigned Slot:</span>

@@ -15,10 +15,47 @@ const PHONE_CLEAN = '919152233822';
 const EMAIL = 'mrmrslaundry29@gmail.com';
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
-// Ensure target directories exist
-if (!fs.existsSync(LOCATIONS_DIR)) {
-  fs.mkdirSync(LOCATIONS_DIR, { recursive: true });
+// Same GTM container as the main site's index.html, so pSEO traffic rolls into one place.
+const GTM_ID = 'GTM-P38X3JKJ';
+
+function gtmHeadSnippet(pagePath) {
+  return `
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','${GTM_ID}');</script>
+    <!-- End Google Tag Manager -->
+    <script>
+      // Sitewide click tracking, pushed to the dataLayer — attach a GA4 Event tag in GTM
+      // to a Custom Event trigger named "whatsapp_click" / "call_click" to forward these.
+      window.dataLayer = window.dataLayer || [];
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (href.indexOf('wa.me') !== -1) {
+          window.dataLayer.push({ event: 'whatsapp_click', page_path: '${pagePath}' });
+        } else if (href.indexOf('tel:') === 0) {
+          window.dataLayer.push({ event: 'call_click', page_path: '${pagePath}' });
+        }
+      });
+    </script>`;
 }
+
+const GTM_BODY_SNIPPET = `
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${GTM_ID}"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->`;
+
+// Wipe and recreate so a location removed from LOCATIONS doesn't leave a stale,
+// un-sitemapped page sitting in public/ (and therefore in every future dist/ build) forever.
+if (fs.existsSync(LOCATIONS_DIR)) {
+  fs.rmSync(LOCATIONS_DIR, { recursive: true, force: true });
+}
+fs.mkdirSync(LOCATIONS_DIR, { recursive: true });
 
 console.log(`🚀 Starting Programmatic Local SEO (pSEO) generation for ${LOCATIONS.length} Mumbai micro-markets...`);
 
@@ -44,13 +81,129 @@ LOCATIONS.forEach((loc) => {
   const canonicalUrl = `${DOMAIN}/locations/${loc.slug}/`;
   const waUrl = `https://wa.me/${PHONE_CLEAN}?text=${encodeURIComponent(`Hi Mr & Mrs Laundry, I would like to book a laundry pickup in ${loc.name} (${loc.pincode})`)}`;
 
+  // Built as a real object and JSON.stringify'd (rather than hand-interpolated into the
+  // <script> tag) so a stray quote/backslash in location data can't produce invalid JSON-LD,
+  // and `<` is escaped so a value can't prematurely close the surrounding <script> tag.
+  // This page is modeled as a Service of the one real business (not its own LocalBusiness
+  // branch with a fabricated street address), since Mr & Mrs Laundry has only two physical
+  // premises (Tardeo store, Malad East facility) and no branch in every neighborhood listed.
+  const jsonLdGraph = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Service',
+        '@id': `${canonicalUrl}#service`,
+        name: `Doorstep Laundry & Dry Cleaning Pickup — ${loc.name}`,
+        serviceType: 'Laundry and Dry Cleaning Pickup & Delivery',
+        url: canonicalUrl,
+        provider: { '@id': `${DOMAIN}/#localbusiness` },
+        areaServed: {
+          '@type': 'Place',
+          name: loc.name,
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: loc.name,
+            addressRegion: 'Maharashtra',
+            postalCode: loc.pincode,
+            addressCountry: 'IN'
+          }
+        },
+        offers: {
+          '@type': 'OfferCatalog',
+          name: `Laundry & Dry Cleaning Rates in ${loc.name}`,
+          itemListElement: [
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Service',
+                name: `Wash & Fold (${loc.name})`,
+                description: 'Daily garments sanitized in 100% individual drum wash, tumble dried and folded.'
+              },
+              price: '99',
+              priceCurrency: 'INR'
+            },
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Service',
+                name: `Wash & Steam Iron (${loc.name})`,
+                description: 'Full wash cycle with wrinkle-free high pressure Italian steam pressing.'
+              },
+              price: '129',
+              priceCurrency: 'INR'
+            },
+            {
+              '@type': 'Offer',
+              itemOffered: {
+                '@type': 'Service',
+                name: `Designer Dry Cleaning (${loc.name})`,
+                description: 'Hydrocarbon eco dry cleaning for suits, lehengas, silk sarees and blazers.'
+              },
+              price: '199',
+              priceCurrency: 'INR'
+            }
+          ]
+        }
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${canonicalUrl}#breadcrumbs`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${DOMAIN}/` },
+          { '@type': 'ListItem', position: 2, name: 'Mumbai Locations', item: `${DOMAIN}/locations/` },
+          { '@type': 'ListItem', position: 3, name: loc.name, item: canonicalUrl }
+        ]
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${canonicalUrl}#faq`,
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: `Do you provide free doorstep laundry pickup in ${loc.name}?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `Yes! Mr & Mrs Laundry provides daily doorstep pickup and delivery across ${loc.name} (${loc.pincode}). Pickup and delivery is completely free on orders of ₹399 and above.`
+            }
+          },
+          {
+            '@type': 'Question',
+            name: `How much does laundry cost per kg in ${loc.name}?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Our Wash & Fold service starts at just ₹99/Kg, and Wash & Steam Iron is ₹129/Kg. All garments are washed in dedicated individual drums with hospital-grade sanitization.'
+            }
+          },
+          {
+            '@type': 'Question',
+            name: `What landmarks in ${loc.name} do you cover?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `We cover all major landmarks across ${loc.name} including ${loc.landmarks.join(', ')} and surrounding societies.`
+            }
+          },
+          {
+            '@type': 'Question',
+            name: `What are your pickup timings for ${loc.name}?`,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: `We operate two convenient pickup and delivery shifts in ${loc.name}: ${loc.pickupSlots.join(' and ')}. Express 24-hour turnaround is also available upon request.`
+            }
+          }
+        ]
+      }
+    ]
+  };
+  const jsonLdScript = JSON.stringify(jsonLdGraph, null, 2).replace(/</g, '\\u003c');
+
   const htmlContent = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+    ${gtmHeadSnippet(`/locations/${loc.slug}/`)}
+
     <!-- Localized SEO Title & Meta -->
     <title>${pageTitle}</title>
     <meta name="description" content="${metaDesc}" />
@@ -80,156 +233,9 @@ LOCATIONS.forEach((loc) => {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- JSON-LD Structured Data: LocalBusiness / DryCleaningOrLaundry -->
+    <!-- JSON-LD Structured Data: Service (provided by the real LocalBusiness, see index.html) -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": ["DryCleaningOrLaundry", "LocalBusiness"],
-          "@id": "${canonicalUrl}#localbusiness",
-          "name": "Mr & Mrs Laundry - ${loc.name}",
-          "alternateName": "Mr & Mrs Laundry ${loc.name} Doorstep Pickup",
-          "url": "${canonicalUrl}",
-          "telephone": "${PHONE_NUMBER}",
-          "email": "${EMAIL}",
-          "priceRange": "₹99 - ₹499",
-          "currenciesAccepted": "INR",
-          "paymentAccepted": "Cash, UPI, Credit Card, Debit Card, Net Banking",
-          "address": {
-            "@type": "PostalAddress",
-            "streetAddress": "${loc.landmarks[0] || loc.name}, ${loc.name}",
-            "addressLocality": "Mumbai",
-            "addressRegion": "Maharashtra",
-            "postalCode": "${loc.pincode}",
-            "addressCountry": "IN"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": ${loc.lat},
-            "longitude": ${loc.lng}
-          },
-          "openingHoursSpecification": [
-            {
-              "@type": "OpeningHoursSpecification",
-              "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-              "opens": "08:00",
-              "closes": "22:00"
-            }
-          ],
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": "4.9",
-            "reviewCount": "520",
-            "bestRating": "5",
-            "worstRating": "1"
-          },
-          "areaServed": [
-            { "@type": "City", "name": "Mumbai" },
-            { "@type": "AdministrativeArea", "name": "${loc.name}" },
-            { "@type": "AdministrativeArea", "name": "${loc.region}" }
-          ],
-          "hasOfferCatalog": {
-            "@type": "OfferCatalog",
-            "name": "Laundry & Dry Cleaning Rates in ${loc.name}",
-            "itemListElement": [
-              {
-                "@type": "Offer",
-                "itemOffered": {
-                  "@type": "Service",
-                  "name": "Wash & Fold (${loc.name})",
-                  "description": "Daily garments sanitized in 100% individual drum wash, tumble dried and folded."
-                },
-                "price": "99",
-                "priceCurrency": "INR"
-              },
-              {
-                "@type": "Offer",
-                "itemOffered": {
-                  "@type": "Service",
-                  "name": "Wash & Steam Iron (${loc.name})",
-                  "description": "Full wash cycle with wrinkle-free high pressure Italian steam pressing."
-                },
-                "price": "129",
-                "priceCurrency": "INR"
-              },
-              {
-                "@type": "Offer",
-                "itemOffered": {
-                  "@type": "Service",
-                  "name": "Designer Dry Cleaning (${loc.name})",
-                  "description": "Hydrocarbon eco dry cleaning for suits, lehengas, silk sarees and blazers."
-                },
-                "price": "199",
-                "priceCurrency": "INR"
-              }
-            ]
-          }
-        },
-        {
-          "@type": "BreadcrumbList",
-          "@id": "${canonicalUrl}#breadcrumbs",
-          "itemListElement": [
-            {
-              "@type": "ListItem",
-              "position": 1,
-              "name": "Home",
-              "item": "${DOMAIN}/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 2,
-              "name": "Mumbai Locations",
-              "item": "${DOMAIN}/locations/"
-            },
-            {
-              "@type": "ListItem",
-              "position": 3,
-              "name": "${loc.name}",
-              "item": "${canonicalUrl}"
-            }
-          ]
-        },
-        {
-          "@type": "FAQPage",
-          "@id": "${canonicalUrl}#faq",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "Do you provide free doorstep laundry pickup in ${loc.name}?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Yes! Mr & Mrs Laundry provides daily doorstep pickup and delivery across ${loc.name} (${loc.pincode}). Pickup and delivery is completely free on orders of ₹399 and above."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "How much does laundry cost per kg in ${loc.name}?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Our Wash & Fold service starts at just ₹99/Kg, and Wash & Steam Iron is ₹129/Kg. All garments are washed in dedicated individual drums with hospital-grade sanitization."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What landmarks in ${loc.name} do you cover?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "We cover all major landmarks across ${loc.name} including ${loc.landmarks.join(', ')} and surrounding societies."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "What are your pickup timings for ${loc.name}?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "We operate two convenient pickup and delivery shifts in ${loc.name}: ${loc.pickupSlots.join(' and ')}. Express 24-hour turnaround is also available upon request."
-              }
-            }
-          ]
-        }
-      ]
-    }
+${jsonLdScript}
     </script>
 
     <style>
@@ -465,6 +471,7 @@ LOCATIONS.forEach((loc) => {
     </style>
   </head>
   <body>
+    ${GTM_BODY_SNIPPET}
     <!-- Top Navigation -->
     <header>
       <div class="container nav-row">
@@ -687,7 +694,7 @@ LOCATIONS.forEach((loc) => {
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Explore our doorstep laundry and dry cleaning services across neighboring suburbs:</p>
         <div class="nearby-links">
           ${nearbyLocations.map((nl) => `<a href="${DOMAIN}/locations/${nl.slug}/" class="nearby-link">📍 Laundry in ${nl.name} (${nl.pincode})</a>`).join('')}
-          <a href="${DOMAIN}/locations/" class="nearby-link" style="color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.4);">→ View All 32 Mumbai Locations</a>
+          <a href="${DOMAIN}/locations/" class="nearby-link" style="color: var(--accent-cyan); border-color: rgba(56, 189, 248, 0.4);">→ View All ${LOCATIONS.length} Mumbai Locations</a>
         </div>
       </section>
     </main>
@@ -727,6 +734,7 @@ const directoryHtml = `<!doctype html>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    ${gtmHeadSnippet('/locations/')}
     <title>Doorstep Laundry Pickup Locations in Mumbai | Mr &amp; Mrs Laundry</title>
     <meta name="description" content="Explore Mr &amp; Mrs Laundry doorstep pickup and delivery across South Mumbai, Western Suburbs, Central Mumbai, Thane &amp; Navi Mumbai. 100% individual drums from ₹99/Kg." />
     <link rel="canonical" href="${DOMAIN}/locations/" />
@@ -775,6 +783,7 @@ const directoryHtml = `<!doctype html>
     </style>
   </head>
   <body>
+    ${GTM_BODY_SNIPPET}
     <header>
       <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
         <a href="${DOMAIN}/" class="brand-title"><span>Mr &amp; Mrs</span> Laundry</a>
@@ -788,7 +797,7 @@ const directoryHtml = `<!doctype html>
     <main class="container">
       <div class="hero">
         <h1>Doorstep Laundry Pickup Locations Across Mumbai</h1>
-        <p>Providing 100% individual drum wash, Italian steam iron &amp; eco-dry cleaning with scheduled doorstep pickup across 32+ prime Mumbai micro-markets.</p>
+        <p>Providing 100% individual drum wash, Italian steam iron &amp; eco-dry cleaning with scheduled doorstep pickup across ${LOCATIONS.length}+ prime Mumbai micro-markets.</p>
       </div>
 
       ${Object.entries(regionsMap)
@@ -828,12 +837,11 @@ console.log(`✅ Generated Master Locations Directory at public/locations/index.
 
 // 3. Generate XML Sitemaps
 // A. public/sitemap-main.xml
+// NOTE: /services, /about, /contact, /gallery are client-side-only routes (hash-based,
+// see src/App.jsx) with no matching static file — a direct/crawler request to those paths
+// gets a real HTTP 404 from GitHub Pages, so they must NOT be submitted as indexable URLs.
 const mainPages = [
   { url: `${DOMAIN}/`, priority: '1.0', changefreq: 'daily' },
-  { url: `${DOMAIN}/services`, priority: '0.9', changefreq: 'weekly' },
-  { url: `${DOMAIN}/about`, priority: '0.8', changefreq: 'monthly' },
-  { url: `${DOMAIN}/contact`, priority: '0.8', changefreq: 'weekly' },
-  { url: `${DOMAIN}/gallery`, priority: '0.7', changefreq: 'monthly' },
   { url: `${DOMAIN}/locations/`, priority: '0.9', changefreq: 'weekly' }
 ];
 

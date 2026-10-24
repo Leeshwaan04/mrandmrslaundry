@@ -3,6 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-P38X3JKJ');</script>
+    <!-- End Google Tag Manager -->
+    <script>
+      // Sitewide click tracking, pushed to the dataLayer — attach a GA4 Event tag in GTM
+      // to a Custom Event trigger named "whatsapp_click" / "call_click" to forward these.
+      window.dataLayer = window.dataLayer || [];
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        var href = a.getAttribute('href') || '';
+        if (href.indexOf('wa.me') !== -1) {
+          window.dataLayer.push({ event: 'whatsapp_click', page_path: '/locations/' });
+        } else if (href.indexOf('tel:') === 0) {
+          window.dataLayer.push({ event: 'call_click', page_path: '/locations/' });
+        }
+      });
+    </script>
     <title>Doorstep Laundry Pickup Locations in Mumbai | Mr &amp; Mrs Laundry</title>
     <meta name="description" content="Explore Mr &amp; Mrs Laundry doorstep pickup and delivery across South Mumbai, Western Suburbs, Central Mumbai, Thane &amp; Navi Mumbai. 100% individual drums from ₹99/Kg." />
     <link rel="canonical" href="https://mrandmrslaundry.com/locations/" />
@@ -51,6 +74,11 @@
     </style>
   </head>
   <body>
+    
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-P38X3JKJ"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <header>
       <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
         <a href="https://mrandmrslaundry.com/" class="brand-title"><span>Mr &amp; Mrs</span> Laundry</a>
