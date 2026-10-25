@@ -597,7 +597,7 @@ export default function Navbar({
                         🚚 Free Doorstep Delivery
                       </div>
                       <div style={{ fontSize: '0.7rem', color: '#a1a1a6', lineHeight: 1.35 }}>
-                        100% FREE pickup &amp; delivery on orders ₹399+ across Mumbai, Thane &amp; Navi Mumbai.
+                        100% FREE pickup &amp; delivery on orders ₹399+ across Mumbai.
                       </div>
                     </div>
 

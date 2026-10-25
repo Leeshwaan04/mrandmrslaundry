@@ -70,7 +70,7 @@ export default function ContactPage({ onOpenBooking }) {
     },
     {
       q: '2. What areas across Mumbai do you serve?',
-      a: 'We proudly serve all localities across South Mumbai (Tardeo, Colaba, Marine Lines, Worli, Lower Parel), Western Suburbs (Bandra, Juhu, Andheri, Malad, Borivali), Central Mumbai (Powai, Chembur, Ghatkopar), as well as Navi Mumbai and Thane regions.',
+      a: 'We proudly serve all localities across South Mumbai (Tardeo, Colaba, Marine Lines, Worli, Lower Parel), Western Suburbs (Bandra, Juhu, Andheri, Malad, Borivali), and Central Mumbai (Powai, Chembur, Ghatkopar).',
     },
     {
       q: '3. How long does it take to get my clothes back?',

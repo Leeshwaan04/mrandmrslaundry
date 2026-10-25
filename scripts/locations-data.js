@@ -394,33 +394,5 @@ export const LOCATIONS = [
     avgTurnaround: '24 - 48 Hours',
     popularServices: ['Corporate Dry Cleaning', 'Wash & Fold (₹99/Kg)', 'Wash & Steam Iron', 'Sneaker Spa'],
     intro: 'Serving tech professionals and families across Hiranandani Gardens and Powai. Book online or on WhatsApp for doorstep pickup from your tower lobby.'
-  },
-
-  // THANE & NAVI MUMBAI
-  {
-    slug: 'thane-west',
-    name: 'Thane West',
-    region: 'Thane & Navi Mumbai',
-    pincode: '400601',
-    lat: 19.2183,
-    lng: 72.9781,
-    landmarks: ['Viviana Mall', 'Hiranandani Meadows', 'Majiwada Junction', 'Ghodbunder Road', 'Korum Mall', 'Panchpakhadi'],
-    pickupSlots: ['Morning: 9:00 AM - 12:30 PM', 'Evening: 5:00 PM - 9:30 PM'],
-    avgTurnaround: '24 - 48 Hours',
-    popularServices: ['Family Wash & Fold (₹99/Kg)', 'Wash & Steam Iron', 'Dry Cleaning', 'Heavy Quilt Spa'],
-    intro: 'Reliable laundry and dry cleaning pickups across Ghodbunder Road, Hiranandani Estate, and Majiwada high-rise townships. Affordable rates with premium quality.'
-  },
-  {
-    slug: 'vashi-navi-mumbai',
-    name: 'Vashi, Navi Mumbai',
-    region: 'Thane & Navi Mumbai',
-    pincode: '400703',
-    lat: 19.0771,
-    lng: 72.9986,
-    landmarks: ['Sector 17 Vashi', 'Inorbit Mall Vashi', 'Palm Beach Road', 'APMC Market', 'Vashi Railway Station'],
-    pickupSlots: ['Morning: 9:00 AM - 12:30 PM', 'Evening: 5:00 PM - 9:30 PM'],
-    avgTurnaround: '24 - 48 Hours',
-    popularServices: ['Wash & Fold (₹99/Kg)', 'Wash & Steam Iron (₹129/Kg)', 'Executive Dry Cleaning', 'Shoe Spa'],
-    intro: 'Convenient laundry and dry cleaning services for Vashi and Palm Beach Road communities. 100% individual processing drums with hospital-grade hygiene.'
   }
 ];

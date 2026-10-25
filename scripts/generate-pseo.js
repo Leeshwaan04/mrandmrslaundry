@@ -681,7 +681,7 @@ ${jsonLdScript}
           </div>
           <div class="feature-item">
             <h3>⭐ Loved Across ${loc.region}</h3>
-            <p>From ${loc.landmarks[Math.min(2, loc.landmarks.length - 1)]} to ${loc.landmarks[Math.min(3, loc.landmarks.length - 1)]}, we're backed by a 4.9/5 rating from verified customers across Mumbai, Thane &amp; Navi Mumbai.</p>
+            <p>From ${loc.landmarks[Math.min(2, loc.landmarks.length - 1)]} to ${loc.landmarks[Math.min(3, loc.landmarks.length - 1)]}, we're backed by a 4.9/5 rating from verified customers across Mumbai.</p>
           </div>
         </div>
       </section>
@@ -758,7 +758,7 @@ const directoryHtml = `<!doctype html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     ${gtmHeadSnippet('/locations/')}
     <title>Doorstep Laundry Pickup Locations in Mumbai | Mr &amp; Mrs Laundry</title>
-    <meta name="description" content="Explore Mr &amp; Mrs Laundry doorstep pickup and delivery across South Mumbai, Western Suburbs, Central Mumbai, Thane &amp; Navi Mumbai. 100% individual drums from ₹99/Kg." />
+    <meta name="description" content="Explore Mr &amp; Mrs Laundry doorstep pickup and delivery across South Mumbai, Western Suburbs &amp; Central Mumbai. 100% individual drums from ₹99/Kg." />
     <link rel="canonical" href="${DOMAIN}/locations/" />
     <meta name="robots" content="index, follow" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -848,7 +848,7 @@ const directoryHtml = `<!doctype html>
 
     <footer>
       <div class="container">
-        <p>&copy; ${new Date().getFullYear()} Mr &amp; Mrs Laundry Mumbai. Doorstep pickup across South Mumbai, Western Suburbs, Central Mumbai, Thane &amp; Navi Mumbai.</p>
+        <p>&copy; ${new Date().getFullYear()} Mr &amp; Mrs Laundry Mumbai. Doorstep pickup across South Mumbai, Western Suburbs &amp; Central Mumbai.</p>
       </div>
     </footer>
   </body>

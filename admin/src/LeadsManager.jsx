@@ -34,14 +34,10 @@ const MUMBAI_LOCALITIES = [
   'Dadar East & Matunga',
   'Chembur',
   'Ghatkopar',
-  'Thane West',
-  'Vashi (Navi Mumbai)',
   // The exact strings the public site's booking form offers (content/business-info.json)
   // so a lead transcribed from a WhatsApp message can match what the customer actually picked.
   'Colaba / Cuffe Parade',
   'Goregaon',
-  'Navi Mumbai',
-  'Thane',
   'Other / Mumbai Unspecified'
 ];
 

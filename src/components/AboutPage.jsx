@@ -33,7 +33,7 @@ export default function AboutPage({ onOpenBooking }) {
     {
       icon: <Clock size={28} color="#30d158" />,
       title: 'Fast & Spotless Turnaround',
-      desc: 'Time is precious in Mumbai. Enjoy standard 24–48 hour delivery or our 24-hour Express service, with punctual doorstep pickup from South Mumbai to Thane.',
+      desc: 'Time is precious in Mumbai. Enjoy standard 24–48 hour delivery or our 24-hour Express service, with punctual doorstep pickup across South Mumbai and the Western Suburbs.',
     },
     {
       icon: <Users size={28} color="#bf5af2" />,
@@ -56,7 +56,7 @@ export default function AboutPage({ onOpenBooking }) {
     {
       year: '2016',
       title: 'Expanding Across Suburbs',
-      desc: 'Expanded pickup and delivery routes from South Mumbai into Western Suburbs, Navi Mumbai, and Thane, serving thousands of working professionals and families.',
+      desc: 'Expanded pickup and delivery routes from South Mumbai into the Western and Central Suburbs, serving thousands of working professionals and families.',
     },
     {
       year: '2020',
@@ -112,7 +112,7 @@ export default function AboutPage({ onOpenBooking }) {
           </h1>
 
           <p style={{ fontSize: '1.15rem', color: '#a1a1a6', lineHeight: 1.65, margin: '0 auto 36px auto' }}>
-            At Mr. and Mrs. Laundry, laundry isn’t just a chore — it’s a commitment to cleanliness, fabric longevity, and effortless living. Proudly serving over 5,000+ loyal customers across Mumbai, Navi Mumbai, and Thane.
+            At Mr. and Mrs. Laundry, laundry isn’t just a chore — it’s a commitment to cleanliness, fabric longevity, and effortless living. Proudly serving over 5,000+ loyal customers across Mumbai.
           </p>
 
           <button

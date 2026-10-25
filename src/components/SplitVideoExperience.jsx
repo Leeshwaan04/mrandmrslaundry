@@ -254,7 +254,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
 
   const homeFaqs = [
     { q: '1. How do I schedule a laundry pickup?', a: `You can easily book a pickup directly on our website, WhatsApp us at ${businessInfo.phone}, or simply call 24/7. Our executive will arrive at your chosen Mumbai time slot.` },
-    { q: '2. What areas across Mumbai do you serve?', a: 'We proudly serve all localities across South Mumbai (Tardeo, Colaba, Worli, Lower Parel), Western Suburbs (Bandra, Juhu, Andheri, Malad, Borivali), Central Mumbai (Powai, Chembur), Navi Mumbai, and Thane.' },
+    { q: '2. What areas across Mumbai do you serve?', a: 'We proudly serve all localities across South Mumbai (Tardeo, Colaba, Worli, Lower Parel), Western Suburbs (Bandra, Juhu, Andheri, Malad, Borivali), and Central Mumbai (Powai, Chembur).' },
     { q: '3. How long does it take to get my clothes back?', a: 'Standard wash and steam press takes 24–48 hours. We also provide a guaranteed 24-hour Express Laundry service for urgent requirements.' },
     { q: '4. What is the minimum order for free doorstep pickup?', a: 'Orders of ₹399 or more enjoy 100% FREE doorstep pickup and return delivery across Mumbai!' },
   ];
@@ -421,7 +421,7 @@ export default function SplitVideoExperience({ onOpenBooking, onNavigate }) {
               textShadow: '0 2px 20px rgba(0, 0, 0, 0.9)',
             }}
           >
-            Over a decade of excellence, 5,000+ happy clients, and fresh, flawless clothes delivered right to your doorstep across Mumbai, Navi Mumbai, and Thane. Fast, hygienic, and budget-friendly.
+            Over a decade of excellence, 5,000+ happy clients, and fresh, flawless clothes delivered right to your doorstep across Mumbai. Fast, hygienic, and budget-friendly.
           </motion.p>
 
           <motion.div
