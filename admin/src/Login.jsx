@@ -17,8 +17,14 @@ export default function Login({ onLoggedIn }) {
       await validateToken();
       onLoggedIn();
     } catch (err) {
-      setError(err instanceof AuthError ? err.message : 'Could not reach GitHub. Check your connection and try again.');
-      setToken('');
+      if (err instanceof AuthError) {
+        setError(err.message);
+        setToken('');
+      } else {
+        // Transient failure (network blip, GitHub 5xx) — keep the token so the
+        // user can just retry instead of re-pasting it.
+        setError('Could not reach GitHub. Check your connection and try again.');
+      }
     } finally {
       setChecking(false);
     }

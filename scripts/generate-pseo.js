@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { LOCATIONS } from './locations-data.js';
 
@@ -56,6 +57,26 @@ if (fs.existsSync(LOCATIONS_DIR)) {
   fs.rmSync(LOCATIONS_DIR, { recursive: true, force: true });
 }
 fs.mkdirSync(LOCATIONS_DIR, { recursive: true });
+
+// Tracks a content hash + lastmod per page so a rebuild where nothing actually
+// changed doesn't stamp every URL with today's date — that false "everything
+// changed" signal wastes crawl budget and erodes trust in lastmod for pages
+// that genuinely did change. This file is committed to the repo so the cache
+// persists across the next person's regeneration (CI never commits).
+const LASTMOD_CACHE_PATH = path.resolve(__dirname, 'pseo-lastmod-cache.json');
+const lastmodCache = fs.existsSync(LASTMOD_CACHE_PATH)
+  ? JSON.parse(fs.readFileSync(LASTMOD_CACHE_PATH, 'utf-8'))
+  : {};
+const lastmodBySlug = {};
+
+function resolveLastmod(slug, content) {
+  const hash = crypto.createHash('sha256').update(content).digest('hex');
+  const cached = lastmodCache[slug];
+  const lastmod = cached && cached.hash === hash ? cached.lastmod : CURRENT_DATE;
+  lastmodCache[slug] = { hash, lastmod };
+  lastmodBySlug[slug] = lastmod;
+  return lastmod;
+}
 
 console.log(`🚀 Starting Programmatic Local SEO (pSEO) generation for ${LOCATIONS.length} Mumbai micro-markets...`);
 
@@ -543,7 +564,7 @@ ${jsonLdScript}
               <h3 class="rate-title">Wash &amp; Fold</h3>
               <div class="rate-price">₹99 <span>/ kg</span></div>
             </div>
-            <p class="rate-desc">Daily apparel weighed, sanitized with gentle detergents in your own dedicated drum, tumble dried and folded.</p>
+            <p class="rate-desc">Daily apparel from ${loc.name} homes near ${loc.landmarks[0]}, weighed and sanitized with gentle detergents in your own dedicated drum, tumble dried and folded.</p>
             <ul class="rate-features">
               <li>100% Individual wash drums</li>
               <li>Hospital-grade microbial sanitization</li>
@@ -648,19 +669,19 @@ ${jsonLdScript}
         <div class="features-row">
           <div class="feature-item">
             <h3>🚫 Zero Clothes Mixing</h3>
-            <p>Every single order is washed in an isolated, dedicated drum. Your garments never touch another household’s clothes.</p>
+            <p>Every order from ${loc.landmarks[0]} and ${loc.landmarks[Math.min(1, loc.landmarks.length - 1)]} is washed in its own isolated, dedicated drum — your garments never touch another household's clothes.</p>
           </div>
           <div class="feature-item">
             <h3>💧 Soft RO-Purified Water</h3>
-            <p>We use mineral-balanced water to ensure your delicate fabrics and bright colors do not stiffen or fade.</p>
+            <p>We use mineral-balanced water on every ${loc.name} order, which matters most for the ${loc.popularServices[0].replace(/\s*\(.*?\)/, '')} requests we handle daily in this neighborhood.</p>
           </div>
           <div class="feature-item">
-            <h3>⏱ Scheduled Doorstep Pickup</h3>
-            <p>Select your preferred morning or evening pickup slot. Our delivery executive comes right to your door or lobby.</p>
+            <h3>⏱ ${loc.avgTurnaround} Turnaround</h3>
+            <p>Our ${loc.name} route runs ${loc.pickupSlots.join(' and ')} — pick whichever window fits your day, and our executive comes right to your door or lobby.</p>
           </div>
           <div class="feature-item">
-            <h3>⭐ 4.9/5 Customer Rating</h3>
-            <p>Backed by more than 520+ verified 5-star customer reviews across Mumbai town and suburban high-rises.</p>
+            <h3>⭐ Loved Across ${loc.region}</h3>
+            <p>From ${loc.landmarks[Math.min(2, loc.landmarks.length - 1)]} to ${loc.landmarks[Math.min(3, loc.landmarks.length - 1)]}, we're backed by a 4.9/5 rating from verified customers across Mumbai, Thane &amp; Navi Mumbai.</p>
           </div>
         </div>
       </section>
@@ -718,6 +739,7 @@ ${jsonLdScript}
 </html>`;
 
   fs.writeFileSync(path.resolve(locDir, 'index.html'), htmlContent, 'utf-8');
+  resolveLastmod(loc.slug, htmlContent);
 });
 
 console.log(`✅ Generated ${LOCATIONS.length} individual static micro-market location pages!`);
@@ -841,8 +863,8 @@ console.log(`✅ Generated Master Locations Directory at public/locations/index.
 // see src/App.jsx) with no matching static file — a direct/crawler request to those paths
 // gets a real HTTP 404 from GitHub Pages, so they must NOT be submitted as indexable URLs.
 const mainPages = [
-  { url: `${DOMAIN}/`, priority: '1.0', changefreq: 'daily' },
-  { url: `${DOMAIN}/locations/`, priority: '0.9', changefreq: 'weekly' }
+  { url: `${DOMAIN}/`, priority: '1.0', changefreq: 'daily', lastmod: CURRENT_DATE },
+  { url: `${DOMAIN}/locations/`, priority: '0.9', changefreq: 'weekly', lastmod: CURRENT_DATE }
 ];
 
 const sitemapMainXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -851,7 +873,7 @@ ${mainPages
   .map(
     (p) => `  <url>
     <loc>${p.url}</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
+    <lastmod>${p.lastmod}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`
@@ -860,7 +882,8 @@ ${mainPages
 </urlset>`;
 fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap-main.xml'), sitemapMainXml, 'utf-8');
 
-// B. public/sitemap-locations.xml
+// B. public/sitemap-locations.xml — lastmod per location comes from resolveLastmod()
+// above (same hash-cached date as the comprehensive sitemap below), not a blanket "today".
 const sitemapLocationsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -872,7 +895,7 @@ const sitemapLocationsXml = `<?xml version="1.0" encoding="UTF-8"?>
 ${LOCATIONS.map(
   (l) => `  <url>
     <loc>${DOMAIN}/locations/${l.slug}/</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
+    <lastmod>${lastmodBySlug[l.slug] || CURRENT_DATE}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>`
@@ -885,7 +908,12 @@ fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap-locations.xml'), sitemapLocat
 // while also generating sitemap-main.xml and sitemap-locations.xml for segmented tracking!
 const allPages = [
   ...mainPages,
-  ...LOCATIONS.map((l) => ({ url: `${DOMAIN}/locations/${l.slug}/`, priority: '0.85', changefreq: 'weekly' }))
+  ...LOCATIONS.map((l) => ({
+    url: `${DOMAIN}/locations/${l.slug}/`,
+    priority: '0.85',
+    changefreq: 'weekly',
+    lastmod: lastmodBySlug[l.slug] || CURRENT_DATE
+  }))
 ];
 
 const sitemapComprehensiveXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -894,7 +922,7 @@ ${allPages
   .map(
     (p) => `  <url>
     <loc>${p.url}</loc>
-    <lastmod>${CURRENT_DATE}</lastmod>
+    <lastmod>${p.lastmod}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`
@@ -902,6 +930,8 @@ ${allPages
   .join('\n')}
 </urlset>`;
 fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap.xml'), sitemapComprehensiveXml, 'utf-8');
+
+fs.writeFileSync(LASTMOD_CACHE_PATH, JSON.stringify(lastmodCache, null, 2) + '\n', 'utf-8');
 
 console.log(`✅ Generated Sitemaps:`);
 console.log(`   - public/sitemap.xml (${allPages.length} URLs)`);

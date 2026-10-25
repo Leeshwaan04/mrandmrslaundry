@@ -98,6 +98,12 @@ export async function getJsonFile(path) {
   if (res.status === 401 || res.status === 403) throw new AuthError();
   if (!res.ok) throw new Error(`Failed to load ${path} (HTTP ${res.status})`);
   const json = await res.json();
+  if (!json.content) {
+    // GitHub's Contents API stops inlining file content above ~1MB — this
+    // admin has no pagination/archiving for that case, so fail loudly instead
+    // of crashing on atob(undefined).
+    throw new Error(`"${path}" is too large to edit here (GitHub only inlines files under ~1MB via this admin). Ask a developer to prune or archive older entries.`);
+  }
   const text = base64ToUtf8(json.content);
   return { data: JSON.parse(text), sha: json.sha };
 }

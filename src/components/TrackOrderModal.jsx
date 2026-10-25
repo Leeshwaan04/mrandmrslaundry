@@ -14,37 +14,54 @@ import {
 } from 'lucide-react';
 import businessInfo from '../../content/business-info.json';
 
+const STATUS_STEPS = {
+  'New Inquiry': 1,
+  'Pickup Scheduled': 2,
+  'In Wash': 3,
+  'Delivered': 4,
+  'Cancelled': 0
+};
+
+const JOURNEY_STEPS = [
+  { step: 1, title: 'Order Received', desc: 'Your pickup request has been logged.' },
+  { step: 2, title: 'Pickup Scheduled', desc: 'Our doorstep partner will collect at your chosen slot.' },
+  { step: 3, title: 'In Wash & Processing', desc: 'At our facility, being sanitized and processed.' },
+  { step: 4, title: 'Delivered', desc: 'Returned to your doorstep.' },
+];
+
+// Looks up an order the customer booked from THIS browser (the only record of a
+// web booking we have, since there's no backend — see BookingModal.jsx). This can
+// only ever find orders placed on this exact device; it is not a universal lookup.
+function findCachedOrder(query) {
+  const normalized = query.trim().toLowerCase().replace(/^mml-?/, '');
+  const digits = query.replace(/\D/g, '');
+  try {
+    const cached = JSON.parse(localStorage.getItem('mml_leads_cache') || '[]');
+    return cached.find((lead) => {
+      const idMatch = lead.id && lead.id.toLowerCase().replace(/^mml-/, '') === normalized;
+      const phoneMatch = digits.length >= 10 && (lead.phone || '').replace(/\D/g, '').endsWith(digits.slice(-10));
+      return idMatch || phoneMatch;
+    }) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
 export default function TrackOrderModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
-
-  const mockOrder = {
-    orderId: query.startsWith('MML') ? query.toUpperCase() : 'MML-8842',
-    customerPhone: query.length >= 10 ? query : businessInfo.phone,
-    pickupDate: 'Today, 10:30 AM',
-    estimatedDelivery: 'Tomorrow by 6:00 PM',
-    status: 'In Eco-Hydro Wash',
-    currentStep: 3,
-    locality: 'South Mumbai (Tardeo / Worli)',
-    itemsSummary: '4.2 Kg Wash & Fold + 2 Pairs Sneakers',
-    steps: [
-      { step: 1, title: 'Pickup Scheduled', desc: 'Confirmed by South Mumbai Logistics Desk', time: '10:00 AM' },
-      { step: 2, title: 'Collected by Doorstep Partner', desc: 'Transferred in sealed cedar container', time: '10:45 AM' },
-      { step: 3, title: 'In Eco-Hydro & Steam Cycle', desc: 'At Malad East Central Facility (Current Stage)', time: '12:30 PM' },
-      { step: 4, title: 'Quality Check & Antibacterial Sealing', desc: 'Inspection under 5000K daylight inspection', time: 'Pending' },
-      { step: 5, title: 'Out for Doorstep Delivery', desc: 'Zero-emission electric delivery vehicle', time: 'Pending' },
-    ],
-  };
+  const [foundOrder, setFoundOrder] = useState(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      setHasSearched(true);
-    }
+    if (!query.trim()) return;
+    setFoundOrder(findCachedOrder(query));
+    setHasSearched(true);
   };
 
   const handleClose = () => {
     setHasSearched(false);
+    setFoundOrder(null);
     setQuery('');
     onClose();
   };
@@ -135,13 +152,13 @@ export default function TrackOrderModal({ isOpen, onClose }) {
               }}
             >
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#30d158' }} />
-              <span>Real-Time Order Tracking</span>
+              <span>Order Lookup (This Device)</span>
             </div>
             <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>
               Track Your Laundry Order
             </h3>
             <p style={{ color: '#86868b', fontSize: '0.92rem', marginTop: '6px' }}>
-              Enter your 10-digit mobile number or Order ID (e.g., MML-8842) to view live progress.
+              Enter the mobile number or Order ID from a booking made on this browser/device to view its status.
             </p>
           </div>
 
@@ -151,7 +168,7 @@ export default function TrackOrderModal({ isOpen, onClose }) {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g. 9152233822 or MML-8842"
+              placeholder="e.g. 9152233822 or MML-XXXXXX"
               required
               style={{
                 flex: 1,
@@ -186,7 +203,7 @@ export default function TrackOrderModal({ isOpen, onClose }) {
           </form>
 
           {/* Results Display */}
-          {hasSearched ? (
+          {hasSearched ? foundOrder ? (
             <div>
               {/* Order Details Header */}
               <div
@@ -200,68 +217,69 @@ export default function TrackOrderModal({ isOpen, onClose }) {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <div style={{ fontSize: '0.85rem', color: '#86868b' }}>
-                    Order ID: <strong style={{ color: '#64d2ff' }}>{mockOrder.orderId}</strong>
+                    Order ID: <strong style={{ color: '#64d2ff' }}>{foundOrder.id}</strong>
                   </div>
                   <div
                     style={{
                       padding: '4px 10px',
                       borderRadius: '999px',
-                      background: 'rgba(48, 209, 88, 0.15)',
-                      color: '#30d158',
+                      background: foundOrder.status === 'Cancelled' ? 'rgba(255, 69, 58, 0.15)' : 'rgba(48, 209, 88, 0.15)',
+                      color: foundOrder.status === 'Cancelled' ? '#ff453a' : '#30d158',
                       fontSize: '0.78rem',
                       fontWeight: 700,
                     }}
                   >
-                    Active In Facility
+                    {foundOrder.status}
                   </div>
                 </div>
 
                 <div style={{ fontSize: '0.92rem', color: '#f5f5f7', fontWeight: 600 }}>
-                  {mockOrder.itemsSummary}
+                  {foundOrder.service}
                 </div>
                 <div style={{ fontSize: '0.82rem', color: '#86868b', marginTop: '4px' }}>
-                  Estimated Delivery: <strong style={{ color: '#fff' }}>{mockOrder.estimatedDelivery}</strong>
+                  Pickup Window: <strong style={{ color: '#fff' }}>{foundOrder.slot}</strong>
                 </div>
               </div>
 
               {/* Progress Steps */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '28px' }}>
-                {mockOrder.steps.map((st) => {
-                  const isDone = st.step < mockOrder.currentStep;
-                  const isCurrent = st.step === mockOrder.currentStep;
-                  const isPending = st.step > mockOrder.currentStep;
+              {foundOrder.status !== 'Cancelled' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '28px' }}>
+                  {JOURNEY_STEPS.map((st) => {
+                    const currentStep = STATUS_STEPS[foundOrder.status] ?? 1;
+                    const isDone = st.step < currentStep;
+                    const isCurrent = st.step === currentStep;
+                    const isPending = st.step > currentStep;
 
-                  return (
-                    <div key={st.step} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                      <div
-                        style={{
-                          width: '32px',
-                          height: '32px',
-                          borderRadius: '50%',
-                          background: isDone
-                            ? '#30d158'
-                            : isCurrent
-                            ? 'rgba(0, 113, 227, 0.3)'
-                            : 'rgba(255, 255, 255, 0.06)',
-                          border: isCurrent
-                            ? '2px solid #0071e3'
-                            : isPending
-                            ? '1px solid rgba(255, 255, 255, 0.1)'
-                            : 'none',
-                          color: '#fff',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
-                          fontSize: '0.85rem',
-                          fontWeight: 700,
-                        }}
-                      >
-                        {isDone ? <CheckCircle2 size={18} color="#000" /> : st.step}
-                      </div>
+                    return (
+                      <div key={st.step} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                        <div
+                          style={{
+                            width: '32px',
+                            height: '32px',
+                            borderRadius: '50%',
+                            background: isDone
+                              ? '#30d158'
+                              : isCurrent
+                              ? 'rgba(0, 113, 227, 0.3)'
+                              : 'rgba(255, 255, 255, 0.06)',
+                            border: isCurrent
+                              ? '2px solid #0071e3'
+                              : isPending
+                              ? '1px solid rgba(255, 255, 255, 0.1)'
+                              : 'none',
+                            color: '#fff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            fontSize: '0.85rem',
+                            fontWeight: 700,
+                          }}
+                        >
+                          {isDone ? <CheckCircle2 size={18} color="#000" /> : st.step}
+                        </div>
 
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <div style={{ flex: 1 }}>
                           <h4
                             style={{
                               fontSize: '0.98rem',
@@ -272,18 +290,15 @@ export default function TrackOrderModal({ isOpen, onClose }) {
                           >
                             {st.title}
                           </h4>
-                          <span style={{ fontSize: '0.78rem', color: isCurrent ? '#64d2ff' : '#86868b' }}>
-                            {st.time}
-                          </span>
+                          <p style={{ fontSize: '0.84rem', color: '#86868b', marginTop: '3px', margin: 0 }}>
+                            {st.desc}
+                          </p>
                         </div>
-                        <p style={{ fontSize: '0.84rem', color: '#86868b', marginTop: '3px', margin: 0 }}>
-                          {st.desc}
-                        </p>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* Help Actions */}
               <div
@@ -332,10 +347,50 @@ export default function TrackOrderModal({ isOpen, onClose }) {
             >
               <PackageCheck size={36} color="#64d2ff" style={{ margin: '0 auto 12px auto' }} />
               <div style={{ fontSize: '0.95rem', color: '#f5f5f7', fontWeight: 600 }}>
-                Live GPS &amp; Facility Barcode Tracking
+                No matching order found on this device
               </div>
               <p style={{ fontSize: '0.85rem', color: '#86868b', maxWidth: '380px', margin: '6px auto 0 auto' }}>
-                Every garment bag is scanned at pickup in Tardeo / Mumbai and logged at the Malad facility.
+                We can only look up orders booked from this same browser. If you booked from another device, or
+                this doesn't look right, message us on WhatsApp and we'll check manually.
+              </p>
+              <a
+                href={`https://wa.me/${businessInfo.whatsappDigits}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '16px',
+                  padding: '8px 16px',
+                  borderRadius: '999px',
+                  background: '#25D366',
+                  color: '#fff',
+                  textDecoration: 'none',
+                  fontSize: '0.84rem',
+                  fontWeight: 600,
+                }}
+              >
+                <MessageSquare size={14} />
+                <span>WhatsApp Logistics</span>
+              </a>
+            </div>
+          ) : (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '30px 20px',
+                borderRadius: '20px',
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px dashed rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <PackageCheck size={36} color="#64d2ff" style={{ margin: '0 auto 12px auto' }} />
+              <div style={{ fontSize: '0.95rem', color: '#f5f5f7', fontWeight: 600 }}>
+                Look Up Your Booking
+              </div>
+              <p style={{ fontSize: '0.85rem', color: '#86868b', maxWidth: '380px', margin: '6px auto 0 auto' }}>
+                Enter the phone number or Order ID from a pickup you booked on this device to see its status.
               </p>
             </div>
           )}

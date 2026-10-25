@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { getJsonFile, putJsonFile, getLastCommit, ConflictError, AuthError } from './GitHubApi';
 import { page, card, input, label, button, banner, colors } from './styles';
 
@@ -105,6 +105,10 @@ export default function LeadsManager({ onBack, onAuthError }) {
   const [filterLocality, setFilterLocality] = useState('ALL');
   const [filterStatus, setFilterStatus] = useState('ALL');
 
+  // Human-readable log of what's changed this session, so the eventual commit
+  // message says what actually happened instead of a generic fixed string.
+  const sessionChangesRef = useRef([]);
+
   // New Lead Modal / Form
   const [isAddingLead, setIsAddingLead] = useState(false);
   const [newLead, setNewLead] = useState({
@@ -144,11 +148,13 @@ export default function LeadsManager({ onBack, onAuthError }) {
     setLeads((prev) =>
       prev.map((l) => (l.id === leadId ? { ...l, status: newStatus } : l))
     );
+    sessionChangesRef.current.push(`Set ${leadId} status to "${newStatus}"`);
   };
 
   const handleDeleteLead = (leadId) => {
     if (window.confirm(`Are you sure you want to delete lead ${leadId}?`)) {
       setLeads((prev) => prev.filter((l) => l.id !== leadId));
+      sessionChangesRef.current.push(`Deleted lead ${leadId}`);
     }
   };
 
@@ -167,6 +173,7 @@ export default function LeadsManager({ onBack, onAuthError }) {
     };
 
     setLeads((prev) => [createdLead, ...prev]);
+    sessionChangesRef.current.push(`Added lead ${createdLead.id} (${createdLead.customerName})`);
     setIsAddingLead(false);
     setNewLead({
       customerName: '',
@@ -188,6 +195,9 @@ export default function LeadsManager({ onBack, onAuthError }) {
     setSaving(true);
     setError('');
     setStatus('');
+    const commitMessage = sessionChangesRef.current.length
+      ? `Leads: ${sessionChangesRef.current.join('; ')}`
+      : 'Update customer leads database via admin';
     try {
       const payload = {
         _meta: {
@@ -196,13 +206,25 @@ export default function LeadsManager({ onBack, onAuthError }) {
         },
         leads
       };
-      await putJsonFile(PATH, payload, sha, 'Update customer leads database via admin');
+      await putJsonFile(PATH, payload, sha, commitMessage);
+      sessionChangesRef.current = [];
       setStatus('Saved successfully — leads database updated in repository!');
       await load();
     } catch (err) {
       if (err instanceof AuthError) return onAuthError();
       if (err instanceof ConflictError) {
-        setError('Database was modified by another session. Please reload and re-apply changes.');
+        // Don't call load() here — it would overwrite the in-memory `leads` state
+        // (including this session's unsaved edits) with the server's copy. Instead,
+        // just refresh the sha so the next Save & Publish attempt can succeed.
+        // Note: this is a last-write-wins resolution — it does not merge with
+        // whatever the other session changed.
+        try {
+          const fresh = await getJsonFile(PATH);
+          setSha(fresh.sha);
+          setError('Another session saved changes in the meantime. Your edits here are still intact — click "Save & Publish" again to overwrite with your version, or reload the page to discard your edits and start from the latest version instead.');
+        } catch (refreshErr) {
+          setError('Database was modified by another session, and refreshing the latest version also failed. Please reload the page and re-apply your changes.');
+        }
       } else {
         setError(err.message || 'Failed to save leads.');
       }
