@@ -490,6 +490,7 @@ ${jsonLdScript}
         gap: 6px;
         padding-right: 6px;
         border-right: 1px solid rgba(255, 255, 255, 0.12);
+        cursor: pointer;
       }
       .status-dot {
         width: 8px;
@@ -498,13 +499,26 @@ ${jsonLdScript}
         background: #34d399;
         box-shadow: 0 0 8px #34d399;
         display: inline-block;
+        flex-shrink: 0;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+      }
+      .status-carousel-wrap {
+        position: relative;
+        height: 18px;
+        min-width: 174px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
       }
       .status-text {
         font-size: 0.78rem;
         font-weight: 700;
-        color: #e2e8f0;
+        color: #f1f5f9;
         letter-spacing: 0.01em;
         white-space: nowrap;
+        position: absolute;
+        left: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
       }
       .island-wa-btn {
         background: #16a34a;
@@ -622,12 +636,31 @@ ${jsonLdScript}
       @media (max-width: 640px) {
         .concierge-island {
           bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-          right: 12px;
-          left: 12px;
+          right: 10px;
+          left: 10px;
           justify-content: space-between;
           padding: 6px 10px;
+          gap: 6px;
         }
-        .status-text { display: none; }
+        .island-status {
+          min-width: 114px;
+          padding-right: 4px;
+          gap: 5px;
+        }
+        .status-carousel-wrap {
+          min-width: 102px;
+        }
+        .status-text {
+          font-size: 0.72rem;
+        }
+        .island-wa-btn {
+          padding: 7px 11px;
+          font-size: 0.76rem;
+        }
+        .island-book-btn {
+          padding: 7px 12px;
+          font-size: 0.76rem;
+        }
       }
     </style>
   </head>
@@ -862,9 +895,11 @@ ${jsonLdScript}
 
     <!-- Floating VisionOS Concierge Island -->
     <div id="concierge-island" class="concierge-island">
-      <div class="island-status">
-        <span class="status-dot"></span>
-        <span class="status-text">${loc.name} Van Active</span>
+      <div class="island-status" onclick="openConciergeModal()" title="Click to book express pickup">
+        <span class="status-dot" id="island-status-dot"></span>
+        <div class="status-carousel-wrap">
+          <span class="status-text" id="island-status-carousel">Pickup Slots Open Today</span>
+        </div>
       </div>
       <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="island-wa-btn" id="island-wa-link">
         💬 WhatsApp
@@ -909,6 +944,39 @@ ${jsonLdScript}
 
     <!-- Concierge Interactive Handler -->
     <script>
+      // Rotating Status Carousel (1: Slots, 2: Concierge, 3: Speed)
+      (function() {
+        var isMobile = window.innerWidth < 640;
+        var carouselItems = [
+          { text: isMobile ? "Slots Open Today" : "Pickup Slots Open Today", color: "#34d399", glow: "0 0 10px #34d399" },
+          { text: isMobile ? "${loc.name} Concierge" : "${loc.name} Concierge Online", color: "#38bdf8", glow: "0 0 10px #38bdf8" },
+          { text: isMobile ? "Next Slot: 60m" : "Next Pickup: Within 60 Mins", color: "#fbbf24", glow: "0 0 10px #fbbf24" }
+        ];
+        var cIdx = 0;
+        var sText = document.getElementById('island-status-carousel');
+        var sDot = document.getElementById('island-status-dot');
+        if (sText) {
+          setInterval(function() {
+            cIdx = (cIdx + 1) % carouselItems.length;
+            sText.style.opacity = '0';
+            sText.style.transform = 'translateY(-7px)';
+            sText.style.filter = 'blur(2px)';
+            setTimeout(function() {
+              sText.textContent = carouselItems[cIdx].text;
+              if (sDot) {
+                sDot.style.background = carouselItems[cIdx].color;
+                sDot.style.boxShadow = carouselItems[cIdx].glow;
+              }
+              sText.style.transform = 'translateY(7px)';
+              void sText.offsetWidth;
+              sText.style.opacity = '1';
+              sText.style.transform = 'translateY(0)';
+              sText.style.filter = 'blur(0)';
+            }, 250);
+          }, 3000);
+        }
+      })();
+
       function openConciergeModal() {
         document.getElementById('concierge-modal').style.display = 'flex';
         if (window.dataLayer) window.dataLayer.push({ event: 'booking_modal_opened', source: 'location_concierge_island', locality: '${loc.name}' });

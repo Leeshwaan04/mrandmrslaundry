@@ -36,11 +36,39 @@ const QUICK_SERVICES = [
   { id: 'ss', label: 'Shoe Spa', price: 'From ₹299' }
 ];
 
+const STATUS_CAROUSEL = [
+  {
+    id: 'slots',
+    text: 'Pickup Slots Open Today',
+    shortText: 'Slots Open Today',
+    dotColor: '#34d399',
+    glow: '0 0 10px #34d399'
+  },
+  {
+    id: 'concierge',
+    text: 'Laundry Concierge Online',
+    shortText: 'Concierge Online',
+    dotColor: '#38bdf8',
+    glow: '0 0 10px #38bdf8'
+  },
+  {
+    id: 'speed',
+    text: 'Next Pickup: Within 60 Mins',
+    shortText: 'Next Slot: 60m',
+    dotColor: '#fbbf24',
+    glow: '0 0 10px #fbbf24'
+  }
+];
+
 export default function ConciergeIsland({ onOpenFullBooking }) {
   // State: 'pill' | 'whatsapp-menu' | 'express-form' | 'success'
   const [viewState, setViewState] = useState('pill');
   const [isScrolledCompact, setIsScrolledCompact] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [carouselIndex, setCarouselIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 640 : false
+  );
 
   // Form Fields
   const [name, setName] = useState('');
@@ -52,10 +80,20 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
 
   const islandRef = useRef(null);
 
-  // Detect time of day for status badge
-  const currentHour = new Date().getHours();
-  const isBusinessHours = currentHour >= 8 && currentHour < 21;
-  const statusBadgeText = isBusinessHours ? 'Live Vans Active in Mumbai' : 'Book for Tomorrow 8 AM';
+  // Responsive resize watcher
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Rotating Status Carousel Timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1) % STATUS_CAROUSEL.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Smart Scroll: Auto-compact on rapid downward scroll, expand when idle or scrolling up
   useEffect(() => {
@@ -199,8 +237,10 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
       ref={islandRef}
       style={{
         position: 'fixed',
-        bottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
-        right: 'calc(20px + env(safe-area-inset-right, 0px))',
+        bottom: isMobile ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : 'calc(20px + env(safe-area-inset-bottom, 0px))',
+        right: isMobile ? (viewState === 'pill' ? '12px' : 'auto') : 'calc(20px + env(safe-area-inset-right, 0px))',
+        left: isMobile ? (viewState === 'pill' ? '12px' : '50%') : 'auto',
+        transform: isMobile && viewState !== 'pill' ? 'translateX(-50%)' : 'none',
         zIndex: 900,
         fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif"
       }}
@@ -222,12 +262,13 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
               WebkitBackdropFilter: 'blur(20px)',
               border: '1px solid rgba(56, 189, 248, 0.28)',
               borderRadius: '9999px',
-              padding: isScrolledCompact ? '8px' : '6px 8px 6px 14px',
+              padding: isScrolledCompact ? '8px' : isMobile ? '6px 8px 6px 10px' : '6px 8px 6px 14px',
               boxShadow:
                 '0 16px 36px -6px rgba(0, 0, 0, 0.75), 0 0 24px -2px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
               display: 'flex',
               alignItems: 'center',
-              gap: isScrolledCompact ? '0' : '10px',
+              justifyContent: isMobile ? 'space-between' : 'flex-start',
+              gap: isScrolledCompact ? '0' : isMobile ? '6px' : '10px',
               cursor: 'pointer',
               userSelect: 'none'
             }}
@@ -266,38 +307,69 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
             ) : (
               // Full Floating Dynamic Island Pill
               <>
-                {/* Live Status Indicator */}
+                {/* Live Carousel Status Indicator (1: Slots, 2: Concierge, 3: Speed) */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
-                    paddingRight: '6px',
-                    borderRight: '1px solid rgba(255, 255, 255, 0.12)'
+                    gap: isMobile ? '5px' : '7px',
+                    paddingRight: isMobile ? '4px' : '8px',
+                    borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    minWidth: isMobile ? '118px' : '176px'
                   }}
                   onClick={() => setViewState('express-form')}
+                  title="Click to book pickup"
                 >
-                  <span
+                  <motion.span
+                    animate={{
+                      scale: [1, 1.25, 1],
+                      opacity: [0.85, 1, 0.85]
+                    }}
+                    transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
                     style={{
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      background: '#34d399',
-                      boxShadow: '0 0 8px #34d399',
-                      display: 'inline-block'
+                      background: STATUS_CAROUSEL[carouselIndex].dotColor,
+                      boxShadow: STATUS_CAROUSEL[carouselIndex].glow,
+                      display: 'inline-block',
+                      flexShrink: 0,
+                      transition: 'background 0.3s ease, box-shadow 0.3s ease'
                     }}
                   />
-                  <span
+                  <div
                     style={{
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      color: '#e2e8f0',
-                      letterSpacing: '0.01em',
-                      whiteSpace: 'nowrap'
+                      position: 'relative',
+                      height: '18px',
+                      width: isMobile ? '104px' : '162px',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                   >
-                    {statusBadgeText}
-                  </span>
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={carouselIndex}
+                        initial={{ opacity: 0, y: 7, filter: 'blur(2px)' }}
+                        animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                        exit={{ opacity: 0, y: -7, filter: 'blur(2px)' }}
+                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                        style={{
+                          fontSize: isMobile ? '0.72rem' : '0.78rem',
+                          fontWeight: 700,
+                          color: '#f1f5f9',
+                          letterSpacing: '0.01em',
+                          whiteSpace: 'nowrap',
+                          position: 'absolute',
+                          left: 0
+                        }}
+                      >
+                        {isMobile ? STATUS_CAROUSEL[carouselIndex].shortText : STATUS_CAROUSEL[carouselIndex].text}
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
                 </div>
 
                 {/* WhatsApp Quick Hop Button */}
@@ -308,20 +380,21 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '9999px',
-                    padding: '8px 14px',
+                    padding: isMobile ? '7px 11px' : '8px 14px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '0.82rem',
+                    gap: '5px',
+                    fontSize: isMobile ? '0.76rem' : '0.82rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     boxShadow: '0 2px 10px rgba(22, 163, 74, 0.35)',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
                   onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  <MessageCircle size={15} />
+                  <MessageCircle size={isMobile ? 14 : 15} />
                   <span>WhatsApp</span>
                 </button>
 
@@ -333,21 +406,22 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '9999px',
-                    padding: '8px 15px',
+                    padding: isMobile ? '7px 12px' : '8px 15px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px',
-                    fontSize: '0.82rem',
+                    gap: '5px',
+                    fontSize: isMobile ? '0.76rem' : '0.82rem',
                     fontWeight: 700,
                     cursor: 'pointer',
                     boxShadow: '0 2px 12px rgba(37, 99, 235, 0.45)',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    flexShrink: 0
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
                   onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  <Zap size={14} style={{ fill: '#ffd60a', color: '#ffd60a' }} />
-                  <span>Book (30s)</span>
+                  <Zap size={isMobile ? 13 : 14} style={{ fill: '#ffd60a', color: '#ffd60a' }} />
+                  <span>{isMobile ? 'Book' : 'Book (30s)'}</span>
                 </button>
               </>
             )}
