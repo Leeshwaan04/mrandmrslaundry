@@ -237,10 +237,13 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
       ref={islandRef}
       style={{
         position: 'fixed',
-        bottom: isMobile ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : 'calc(20px + env(safe-area-inset-bottom, 0px))',
-        right: isMobile ? (viewState === 'pill' ? '12px' : 'auto') : 'calc(20px + env(safe-area-inset-right, 0px))',
-        left: isMobile ? (viewState === 'pill' ? '12px' : '50%') : 'auto',
-        transform: isMobile && viewState !== 'pill' ? 'translateX(-50%)' : 'none',
+        bottom: isMobile ? 'calc(16px + env(safe-area-inset-bottom, 0px))' : 'calc(24px + env(safe-area-inset-bottom, 0px))',
+        left: isMobile ? '0' : 'auto',
+        right: isMobile ? '0' : 'calc(24px + env(safe-area-inset-right, 0px))',
+        display: 'flex',
+        justifyContent: isMobile ? 'center' : 'flex-end',
+        alignItems: 'center',
+        pointerEvents: 'none',
         zIndex: 900,
         fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif"
       }}
@@ -257,20 +260,21 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
             exit={{ opacity: 0, scale: 0.9, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             style={{
-              background: 'rgba(10, 14, 23, 0.88)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(56, 189, 248, 0.28)',
+              pointerEvents: 'auto',
+              background: 'rgba(10, 14, 23, 0.92)',
+              backdropFilter: 'blur(24px)',
+              WebkitBackdropFilter: 'blur(24px)',
+              border: '1px solid rgba(255, 255, 255, 0.14)',
               borderRadius: '9999px',
-              padding: isScrolledCompact ? '8px' : isMobile ? '6px 8px 6px 10px' : '6px 8px 6px 14px',
+              padding: isScrolledCompact ? '6px' : '4px 5px 4px 12px',
               boxShadow:
-                '0 16px 36px -6px rgba(0, 0, 0, 0.75), 0 0 24px -2px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12)',
-              display: 'flex',
+                '0 12px 32px -4px rgba(0, 0, 0, 0.75), 0 0 20px -2px rgba(37, 99, 235, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: isMobile ? 'space-between' : 'flex-start',
-              gap: isScrolledCompact ? '0' : isMobile ? '6px' : '10px',
-              cursor: 'pointer',
-              userSelect: 'none'
+              gap: isScrolledCompact ? '0' : '7px',
+              userSelect: 'none',
+              maxWidth: 'calc(100vw - 24px)',
+              boxSizing: 'border-box'
             }}
           >
             {isScrolledCompact ? (
@@ -310,17 +314,16 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                 {/* Live Carousel Status Indicator (1: Slots, 2: Concierge, 3: Speed) */}
                 <div
                   style={{
-                    display: 'flex',
+                    display: 'inline-flex',
                     alignItems: 'center',
-                    gap: isMobile ? '5px' : '7px',
-                    paddingRight: isMobile ? '4px' : '8px',
-                    borderRight: '1px solid rgba(255, 255, 255, 0.12)',
+                    gap: '7px',
                     cursor: 'pointer',
                     userSelect: 'none',
-                    minWidth: isMobile ? '118px' : '176px'
+                    height: '32px',
+                    paddingRight: '2px'
                   }}
                   onClick={() => setViewState('express-form')}
-                  title="Click to book pickup"
+                  title="Click to book express pickup"
                 >
                   <motion.span
                     animate={{
@@ -329,8 +332,8 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                     }}
                     transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
                     style={{
-                      width: '8px',
-                      height: '8px',
+                      width: '7px',
+                      height: '7px',
                       borderRadius: '50%',
                       background: STATUS_CAROUSEL[carouselIndex].dotColor,
                       boxShadow: STATUS_CAROUSEL[carouselIndex].glow,
@@ -342,8 +345,8 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                   <div
                     style={{
                       position: 'relative',
-                      height: '18px',
-                      width: isMobile ? '104px' : '162px',
+                      height: '20px',
+                      width: isMobile ? '106px' : '158px',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center'
@@ -352,18 +355,23 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                     <AnimatePresence mode="wait">
                       <motion.span
                         key={carouselIndex}
-                        initial={{ opacity: 0, y: 7, filter: 'blur(2px)' }}
+                        initial={{ opacity: 0, y: 6, filter: 'blur(2px)' }}
                         animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                        exit={{ opacity: 0, y: -7, filter: 'blur(2px)' }}
-                        transition={{ duration: 0.3, ease: 'easeOut' }}
+                        exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
                         style={{
                           fontSize: isMobile ? '0.72rem' : '0.78rem',
                           fontWeight: 700,
-                          color: '#f1f5f9',
+                          lineHeight: '20px',
+                          color: '#f8fafc',
                           letterSpacing: '0.01em',
                           whiteSpace: 'nowrap',
                           position: 'absolute',
-                          left: 0
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          display: 'flex',
+                          alignItems: 'center'
                         }}
                       >
                         {isMobile ? STATUS_CAROUSEL[carouselIndex].shortText : STATUS_CAROUSEL[carouselIndex].text}
@@ -371,6 +379,16 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                     </AnimatePresence>
                   </div>
                 </div>
+
+                {/* Vertical Divider */}
+                <span
+                  style={{
+                    width: '1px',
+                    height: '14px',
+                    background: 'rgba(255, 255, 255, 0.16)',
+                    flexShrink: 0
+                  }}
+                />
 
                 {/* WhatsApp Quick Hop Button */}
                 <button
@@ -380,21 +398,23 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '9999px',
-                    padding: isMobile ? '7px 11px' : '8px 14px',
-                    display: 'flex',
+                    height: '32px',
+                    padding: isMobile ? '0 10px' : '0 13px',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     gap: '5px',
-                    fontSize: isMobile ? '0.76rem' : '0.82rem',
+                    fontSize: isMobile ? '0.75rem' : '0.80rem',
                     fontWeight: 700,
+                    lineHeight: '32px',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 10px rgba(22, 163, 74, 0.35)',
+                    boxShadow: '0 2px 8px rgba(22, 163, 74, 0.35)',
                     transition: 'all 0.2s ease',
                     flexShrink: 0
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
                   onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  <MessageCircle size={isMobile ? 14 : 15} />
+                  <MessageCircle size={isMobile ? 13 : 14} />
                   <span>WhatsApp</span>
                 </button>
 
@@ -406,21 +426,23 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '9999px',
-                    padding: isMobile ? '7px 12px' : '8px 15px',
-                    display: 'flex',
+                    height: '32px',
+                    padding: isMobile ? '0 11px' : '0 14px',
+                    display: 'inline-flex',
                     alignItems: 'center',
                     gap: '5px',
-                    fontSize: isMobile ? '0.76rem' : '0.82rem',
+                    fontSize: isMobile ? '0.75rem' : '0.80rem',
                     fontWeight: 700,
+                    lineHeight: '32px',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 12px rgba(37, 99, 235, 0.45)',
+                    boxShadow: '0 2px 10px rgba(37, 99, 235, 0.45)',
                     transition: 'all 0.2s ease',
                     flexShrink: 0
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
                   onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
                 >
-                  <Zap size={isMobile ? 13 : 14} style={{ fill: '#ffd60a', color: '#ffd60a' }} />
+                  <Zap size={isMobile ? 12 : 13} style={{ fill: '#ffd60a', color: '#ffd60a' }} />
                   <span>{isMobile ? 'Book' : 'Book (30s)'}</span>
                 </button>
               </>
@@ -439,7 +461,9 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
             exit={{ opacity: 0, scale: 0.92, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             style={{
-              width: '320px',
+              pointerEvents: 'auto',
+              width: isMobile ? 'calc(100vw - 28px)' : '320px',
+              maxWidth: '360px',
               background: 'rgba(10, 14, 23, 0.94)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
@@ -581,8 +605,9 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
             exit={{ opacity: 0, scale: 0.92, y: 10 }}
             transition={{ type: 'spring', damping: 25, stiffness: 350 }}
             style={{
-              width: '340px',
-              maxWidth: '92vw',
+              pointerEvents: 'auto',
+              width: isMobile ? 'calc(100vw - 28px)' : '340px',
+              maxWidth: '380px',
               background: 'rgba(10, 14, 23, 0.95)',
               backdropFilter: 'blur(28px)',
               WebkitBackdropFilter: 'blur(28px)',
@@ -755,7 +780,9 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             style={{
-              width: '320px',
+              pointerEvents: 'auto',
+              width: isMobile ? 'calc(100vw - 28px)' : '320px',
+              maxWidth: '360px',
               background: 'rgba(10, 14, 23, 0.96)',
               backdropFilter: 'blur(24px)',
               border: '1px solid rgba(48, 209, 88, 0.4)',
