@@ -82,7 +82,7 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
     };
   }, [lastScrollY, viewState]);
 
-  // Click outside to collapse
+  // Click outside & Escape key to collapse
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (islandRef.current && !islandRef.current.contains(e.target)) {
@@ -91,8 +91,17 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
         }
       }
     };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && viewState !== 'pill') {
+        setViewState('pill');
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [viewState]);
 
   // 1-Tap WhatsApp Prompts
@@ -190,8 +199,8 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
       ref={islandRef}
       style={{
         position: 'fixed',
-        bottom: '22px',
-        right: '22px',
+        bottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+        right: 'calc(20px + env(safe-area-inset-right, 0px))',
         zIndex: 900,
         fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif"
       }}
@@ -728,3 +737,4 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
     </div>
   );
 }
+

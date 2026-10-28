@@ -469,8 +469,8 @@ ${jsonLdScript}
       /* Floating VisionOS Concierge Island */
       .concierge-island {
         position: fixed;
-        bottom: 22px;
-        right: 22px;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        right: calc(20px + env(safe-area-inset-right, 0px));
         z-index: 900;
         background: rgba(10, 14, 23, 0.88);
         backdrop-filter: blur(20px);
@@ -621,7 +621,7 @@ ${jsonLdScript}
 
       @media (max-width: 640px) {
         .concierge-island {
-          bottom: 16px;
+          bottom: calc(16px + env(safe-area-inset-bottom, 0px));
           right: 12px;
           left: 12px;
           justify-content: space-between;
