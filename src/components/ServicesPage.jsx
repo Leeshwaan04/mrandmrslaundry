@@ -555,6 +555,229 @@ export default function ServicesPage({ onOpenBooking }) {
         </div>
       </section>
 
+      {/* Privilege Savings Packages (Prepaid Wallets) */}
+      <section
+        style={{
+          borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+          backgroundColor: '#07090f',
+          padding: '80px 24px',
+        }}
+      >
+        <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '6px 16px',
+                borderRadius: '999px',
+                background: 'rgba(255, 214, 10, 0.12)',
+                border: '1px solid rgba(255, 214, 10, 0.35)',
+                marginBottom: '14px',
+              }}
+            >
+              <Crown size={15} color="#ffd60a" />
+              <span style={{ fontSize: '0.8rem', color: '#ffd60a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Mr &amp; Mrs Privilege Membership Packs
+              </span>
+            </div>
+            <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.7rem)', fontWeight: 800, color: '#fff', marginBottom: '12px' }}>
+              Prepay &amp; Unlock Up to 25% Bonus Value
+            </h2>
+            <p style={{ color: '#86868b', fontSize: '1rem', maxWidth: '640px', margin: '0 auto' }}>
+              Designed for busy Mumbai households. Never worry about daily change or OTPs—recharge once and enjoy priority doorstep dispatch on every load.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: '24px',
+              alignItems: 'stretch',
+            }}
+          >
+            {/* Pack 1 */}
+            <div
+              style={{
+                background: 'rgba(15, 16, 22, 0.85)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '24px',
+                padding: '32px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64d2ff', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Starter Privilege</span>
+                <div style={{ fontSize: '2.2rem', fontWeight: 800, color: '#fff', margin: '12px 0 6px 0' }}>₹1,999</div>
+                <div style={{ fontSize: '0.9rem', color: '#30d158', fontWeight: 600, marginBottom: '20px' }}>
+                  Get ₹2,300 Laundry Credit (+15% Bonus)
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: '#a1a1a6', marginBottom: '24px' }}>
+                  <div>✓ Valid across all Wash &amp; Fold, Ironing, and Dry Cleaning</div>
+                  <div>✓ 100% Individual Hygienic Wash Drums</div>
+                  <div>✓ FREE Doorstep Delivery on every pickup</div>
+                  <div>✓ 6-Month Validity with zero expiration stress</div>
+                </div>
+              </div>
+              <a
+                href={`https://wa.me/919152233822?text=${encodeURIComponent('Hi Mr & Mrs Laundry, I would like to activate the Starter Privilege Pack (Pay ₹1,999 to get ₹2,300 credit).')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent('privilege_pack_click', { pack: 'starter', deposit: 1999, credit: 2300 })}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.16)',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  textAlign: 'center',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>Activate on WhatsApp</span>
+                <ArrowRight size={14} />
+              </a>
+            </div>
+
+            {/* Pack 2 (Featured) */}
+            <div
+              style={{
+                background: 'linear-gradient(180deg, rgba(20, 35, 60, 0.9) 0%, rgba(10, 18, 32, 0.95) 100%)',
+                border: '2px solid #0071e3',
+                borderRadius: '24px',
+                padding: '32px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                position: 'relative',
+                boxShadow: '0 20px 50px rgba(0, 113, 227, 0.25)',
+              }}
+            >
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '-12px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  background: '#0071e3',
+                  color: '#fff',
+                  fontSize: '0.72rem',
+                  fontWeight: 800,
+                  padding: '4px 16px',
+                  borderRadius: '999px',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Most Popular for Families
+              </div>
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Family Privilege</span>
+                <div style={{ fontSize: '2.2rem', fontWeight: 800, color: '#fff', margin: '12px 0 6px 0' }}>₹3,999</div>
+                <div style={{ fontSize: '0.9rem', color: '#30d158', fontWeight: 600, marginBottom: '20px' }}>
+                  Get ₹4,800 Laundry Credit (+20% Bonus)
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: '#e2e8f0', marginBottom: '24px' }}>
+                  <div>✓ Everything in Starter + Priority 24h Express Queue</div>
+                  <div>✓ 1 Free Shoe Spa &amp; Sneaker Restoration included (₹499 value)</div>
+                  <div>✓ Complimentary minor button &amp; hem re-stitching</div>
+                  <div>✓ 12-Month Extended Validity</div>
+                </div>
+              </div>
+              <a
+                href={`https://wa.me/919152233822?text=${encodeURIComponent('Hi Mr & Mrs Laundry, I would like to activate the Family Privilege Pack (Pay ₹3,999 to get ₹4,800 credit + Free Shoe Spa).')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent('privilege_pack_click', { pack: 'family', deposit: 3999, credit: 4800 })}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #0071e3 0%, #0056b3 100%)',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  textAlign: 'center',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 8px 25px rgba(0, 113, 227, 0.4)',
+                }}
+              >
+                <span>Activate Family Pack</span>
+                <ArrowRight size={14} />
+              </a>
+            </div>
+
+            {/* Pack 3 */}
+            <div
+              style={{
+                background: 'rgba(15, 16, 22, 0.85)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '24px',
+                padding: '32px 28px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#ffd60a', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Royal Wardrobe VIP</span>
+                <div style={{ fontSize: '2.2rem', fontWeight: 800, color: '#fff', margin: '12px 0 6px 0' }}>₹7,999</div>
+                <div style={{ fontSize: '0.9rem', color: '#30d158', fontWeight: 600, marginBottom: '20px' }}>
+                  Get ₹10,000 Laundry Credit (+25% Bonus)
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.85rem', color: '#a1a1a6', marginBottom: '24px' }}>
+                  <div>✓ Everything in Family + Dedicated Mumbai Valet Concierge</div>
+                  <div>✓ 2 Free Shoe Spas + Free Italian Hanger Packaging</div>
+                  <div>✓ Guaranteed 24-Hour Express Return at Standard Rates</div>
+                  <div>✓ Lifetime Validity &bull; Shareable across family members</div>
+                </div>
+              </div>
+              <a
+                href={`https://wa.me/919152233822?text=${encodeURIComponent('Hi Mr & Mrs Laundry, I would like to activate the Royal Wardrobe VIP Pack (Pay ₹7,999 to get ₹10,000 credit).')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent('privilege_pack_click', { pack: 'royal', deposit: 7999, credit: 10000 })}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '14px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.16)',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                  fontWeight: 600,
+                  textAlign: 'center',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>Activate VIP Pack</span>
+                <ArrowRight size={14} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Comprehensive Rate Card */}
       <section style={{ maxWidth: '1240px', margin: '0 auto', padding: '90px 24px' }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>

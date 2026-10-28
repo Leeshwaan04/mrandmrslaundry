@@ -290,6 +290,32 @@ export default function HeroSection({ onOpenBooking, onCycleChange }) {
       />
 
       <div className="container-max" style={{ width: '100%', position: 'relative', zIndex: 10 }}>
+        {/* First Order Promotional Hook */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ textAlign: 'center', marginBottom: '14px' }}
+        >
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 18px',
+              borderRadius: '999px',
+              background: 'linear-gradient(90deg, rgba(255, 107, 107, 0.15) 0%, rgba(255, 159, 10, 0.15) 100%)',
+              border: '1px solid rgba(255, 159, 10, 0.4)',
+              boxShadow: '0 4px 20px rgba(255, 159, 10, 0.2)',
+            }}
+          >
+            <span style={{ fontSize: '0.85rem' }}>🎁</span>
+            <span style={{ fontSize: '0.82rem', color: '#ffb340', fontWeight: 700, letterSpacing: '0.04em' }}>
+              FIRST TIME IN MUMBAI? GET ₹75 OFF YOUR 1ST PICKUP &bull; CODE: MUMBAI75
+            </span>
+          </div>
+        </motion.div>
+
         {/* Apple Intro Pill */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -371,6 +397,35 @@ export default function HeroSection({ onOpenBooking, onCycleChange }) {
             )}
             <span>{isWashing ? 'Cycle In Progress...' : 'Simulate 1200 RPM Cycle'}</span>
           </motion.button>
+        </motion.div>
+
+        {/* Instant Value & Trust Strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.45 }}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '12px 18px',
+            flexWrap: 'wrap',
+            marginBottom: '44px',
+            fontSize: '0.86rem',
+            color: '#cbd5e1',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.05)', padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <span style={{ color: '#64d2ff', fontWeight: 700 }}>🧺 Wash &amp; Fold ₹99/Kg</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.05)', padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <span style={{ color: '#30d158', fontWeight: 700 }}>🛡️ 100% Individual Drums</span>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>(Zero Mixing)</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.05)', padding: '6px 14px', borderRadius: '999px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <span style={{ color: '#ffd60a', fontWeight: 700 }}>⚡ Free Doorstep Delivery</span>
+            <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>(Orders ₹399+)</span>
+          </div>
         </motion.div>
 
         {/* Interactive 3D Drum Simulation Showcase */}
