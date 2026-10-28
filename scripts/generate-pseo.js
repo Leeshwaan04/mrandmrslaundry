@@ -16,7 +16,20 @@ const PHONE_CLEAN = '919152233822';
 const EMAIL = 'mrmrslaundry29@gmail.com';
 const CURRENT_DATE = new Date().toISOString().split('T')[0];
 
-// Same GTM container as the main site's index.html, so pSEO traffic rolls into one place.
+// Load Official 84-Item Price List
+const PRICE_LIST_PATH = path.resolve(ROOT_DIR, 'content', 'price-list.json');
+const PRICE_LIST = JSON.parse(fs.readFileSync(PRICE_LIST_PATH, 'utf-8'));
+
+const ALL_RATE_ITEMS = [
+  ...PRICE_LIST.laundryServices.map((i) => ({ ...i, cat: 'laundry', catLabel: '🧺 Laundry by Kg', item: i.name })),
+  ...PRICE_LIST.mensDryCleaning.map((i) => ({ ...i, cat: 'mens', catLabel: "👔 Men's Wear" })),
+  ...PRICE_LIST.womensDryCleaning.map((i) => ({ ...i, cat: 'womens', catLabel: "👗 Women's Wear" })),
+  ...PRICE_LIST.householdDryCleaning.map((i) => ({ ...i, cat: 'household', catLabel: '🏠 Household & Linens' })),
+  ...PRICE_LIST.woolenDryCleaning.map((i) => ({ ...i, cat: 'woolen', catLabel: '🧥 Woolen Wear' })),
+  ...PRICE_LIST.shoeLaundry.map((i) => ({ ...i, cat: 'shoes', catLabel: '👟 Shoe Laundry' }))
+];
+
+// Same GTM container as main site
 const GTM_ID = 'GTM-P38X3JKJ';
 
 function gtmHeadSnippet(pagePath) {
@@ -29,8 +42,6 @@ function gtmHeadSnippet(pagePath) {
     })(window,document,'script','dataLayer','${GTM_ID}');</script>
     <!-- End Google Tag Manager -->
     <script>
-      // Sitewide click tracking, pushed to the dataLayer — attach a GA4 Event tag in GTM
-      // to a Custom Event trigger named "whatsapp_click" / "call_click" to forward these.
       window.dataLayer = window.dataLayer || [];
       document.addEventListener('click', function (e) {
         var a = e.target.closest('a[href]');
@@ -51,18 +62,11 @@ const GTM_BODY_SNIPPET = `
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->`;
 
-// Wipe and recreate so a location removed from LOCATIONS doesn't leave a stale,
-// un-sitemapped page sitting in public/ (and therefore in every future dist/ build) forever.
 if (fs.existsSync(LOCATIONS_DIR)) {
   fs.rmSync(LOCATIONS_DIR, { recursive: true, force: true });
 }
 fs.mkdirSync(LOCATIONS_DIR, { recursive: true });
 
-// Tracks a content hash + lastmod per page so a rebuild where nothing actually
-// changed doesn't stamp every URL with today's date — that false "everything
-// changed" signal wastes crawl budget and erodes trust in lastmod for pages
-// that genuinely did change. This file is committed to the repo so the cache
-// persists across the next person's regeneration (CI never commits).
 const LASTMOD_CACHE_PATH = path.resolve(__dirname, 'pseo-lastmod-cache.json');
 const lastmodCache = fs.existsSync(LASTMOD_CACHE_PATH)
   ? JSON.parse(fs.readFileSync(LASTMOD_CACHE_PATH, 'utf-8'))
@@ -78,6 +82,32 @@ function resolveLastmod(slug, content) {
   return lastmod;
 }
 
+function renderRateCards(loc) {
+  return ALL_RATE_ITEMS.map((item) => {
+    const waText = encodeURIComponent(`Hi Mr & Mrs Laundry, I would like to book doorstep pickup for ${item.item} (${item.rate}) in ${loc.name} (${loc.pincode})`);
+    const waItemUrl = `https://wa.me/${PHONE_CLEAN}?text=${waText}`;
+    const cleanItemName = item.item.replace(/'/g, "\\'");
+
+    return `
+      <div class="rate-item-card" data-cat="${item.cat}" data-name="${item.item.toLowerCase()}">
+        <div class="card-top">
+          <span class="cat-pill cat-${item.cat}">${item.catLabel}</span>
+          <div class="item-rate">${item.rate}</div>
+        </div>
+        <div class="item-title">${item.item}</div>
+        ${item.note ? `<div class="item-note">${item.note}</div>` : ''}
+        <div class="card-actions">
+          <a href="${waItemUrl}" target="_blank" rel="noopener noreferrer" class="card-wa-btn">
+            💬 WhatsApp
+          </a>
+          <button type="button" class="card-book-btn" onclick="openConciergeModalWithService('${cleanItemName} (${item.rate})')">
+            ⚡ Book (30s)
+          </button>
+        </div>
+      </div>`;
+  }).join('\n');
+}
+
 console.log(`🚀 Starting Programmatic Local SEO (pSEO) generation for ${LOCATIONS.length} Mumbai micro-markets...`);
 
 // 1. Generate Individual Location Pages
@@ -87,11 +117,9 @@ LOCATIONS.forEach((loc) => {
     fs.mkdirSync(locDir, { recursive: true });
   }
 
-  // Find nearby locations in same region for internal cross-linking mesh
   const nearbyLocations = LOCATIONS
     .filter((l) => l.slug !== loc.slug && l.region === loc.region)
     .slice(0, 6);
-  // Fallback to any other locations if same region has few
   if (nearbyLocations.length < 5) {
     const extra = LOCATIONS.filter((l) => l.slug !== loc.slug && !nearbyLocations.includes(l)).slice(0, 6 - nearbyLocations.length);
     nearbyLocations.push(...extra);
@@ -102,12 +130,6 @@ LOCATIONS.forEach((loc) => {
   const canonicalUrl = `${DOMAIN}/locations/${loc.slug}/`;
   const waUrl = `https://wa.me/${PHONE_CLEAN}?text=${encodeURIComponent(`Hi Mr & Mrs Laundry, I would like to book a laundry pickup in ${loc.name} (${loc.pincode})`)}`;
 
-  // Built as a real object and JSON.stringify'd (rather than hand-interpolated into the
-  // <script> tag) so a stray quote/backslash in location data can't produce invalid JSON-LD,
-  // and `<` is escaped so a value can't prematurely close the surrounding <script> tag.
-  // This page is modeled as a Service of the one real business (not its own LocalBusiness
-  // branch with a fabricated street address), since Mr & Mrs Laundry has only two physical
-  // premises (Tardeo store, Malad East facility) and no branch in every neighborhood listed.
   const jsonLdGraph = {
     '@context': 'https://schema.org',
     '@graph': [
@@ -131,39 +153,17 @@ LOCATIONS.forEach((loc) => {
         },
         offers: {
           '@type': 'OfferCatalog',
-          name: `Laundry & Dry Cleaning Rates in ${loc.name}`,
-          itemListElement: [
-            {
-              '@type': 'Offer',
-              itemOffered: {
-                '@type': 'Service',
-                name: `Wash & Fold (${loc.name})`,
-                description: 'Daily garments sanitized in 100% individual drum wash, tumble dried and folded.'
-              },
-              price: '99',
-              priceCurrency: 'INR'
+          name: `Official Laundry & Dry Cleaning Rates in ${loc.name}`,
+          itemListElement: ALL_RATE_ITEMS.map((it) => ({
+            '@type': 'Offer',
+            itemOffered: {
+              '@type': 'Service',
+              name: `${it.item} (${loc.name})`,
+              description: it.note || `Professional ${it.catLabel} service with free doorstep pickup in ${loc.name}.`
             },
-            {
-              '@type': 'Offer',
-              itemOffered: {
-                '@type': 'Service',
-                name: `Wash & Steam Iron (${loc.name})`,
-                description: 'Full wash cycle with wrinkle-free high pressure Italian steam pressing.'
-              },
-              price: '129',
-              priceCurrency: 'INR'
-            },
-            {
-              '@type': 'Offer',
-              itemOffered: {
-                '@type': 'Service',
-                name: `Designer Dry Cleaning (${loc.name})`,
-                description: 'Hydrocarbon eco dry cleaning for suits, lehengas, silk sarees and blazers.'
-              },
-              price: '199',
-              priceCurrency: 'INR'
-            }
-          ]
+            price: String(it.rateNum),
+            priceCurrency: 'INR'
+          }))
         }
       },
       {
@@ -192,7 +192,7 @@ LOCATIONS.forEach((loc) => {
             name: `How much does laundry cost per kg in ${loc.name}?`,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Our Wash & Fold service starts at just ₹99/Kg, and Wash & Steam Iron is ₹129/Kg. All garments are washed in dedicated individual drums with hospital-grade sanitization.'
+              text: 'Our Wash & Fold service starts at just ₹99/Kg, and Wash & Steam Iron is ₹159/Kg. Steam Ironing alone is ₹99/Kg. All garments are washed in dedicated individual drums with hospital-grade sanitization.'
             }
           },
           {
@@ -200,7 +200,7 @@ LOCATIONS.forEach((loc) => {
             name: `What landmarks in ${loc.name} do you cover?`,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: `We cover all major landmarks across ${loc.name} including ${loc.landmarks.join(', ')} and surrounding societies.`
+              text: `We cover all major landmarks across ${loc.name} including ${loc.landmarks.join(', ')} and surrounding residential societies.`
             }
           },
           {
@@ -208,7 +208,7 @@ LOCATIONS.forEach((loc) => {
             name: `What are your pickup timings for ${loc.name}?`,
             acceptedAnswer: {
               '@type': 'Answer',
-              text: `We operate two convenient pickup and delivery shifts in ${loc.name}: ${loc.pickupSlots.join(' and ')}. Express 24-hour turnaround is also available upon request.`
+              text: `We operate two daily shifts in ${loc.name}: ${loc.pickupSlots.join(' and ')}. Express 24-hour turnaround is also available upon request.`
             }
           }
         ]
@@ -254,18 +254,17 @@ LOCATIONS.forEach((loc) => {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- JSON-LD Structured Data: Service (provided by the real LocalBusiness, see index.html) -->
+    <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
 ${jsonLdScript}
     </script>
 
     <style>
       :root {
-        --bg-main: #050508;
-        --bg-card: #0e121d;
-        --bg-card-hover: #131929;
-        --border-color: #1e293b;
-        --accent-blue: #2563eb;
+        --bg-main: #050811;
+        --bg-card: rgba(14, 20, 32, 0.85);
+        --border-color: rgba(255, 255, 255, 0.08);
+        --accent-blue: #0071e3;
         --accent-cyan: #38bdf8;
         --accent-green: #10b981;
         --text-white: #f8fafc;
@@ -274,19 +273,22 @@ ${jsonLdScript}
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body {
         background-color: var(--bg-main);
+        background-image: radial-gradient(ellipse 100% 60% at 50% -10%, rgba(37, 99, 235, 0.2), transparent 75%);
         color: var(--text-white);
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         line-height: 1.6;
-        padding-bottom: 80px;
+        padding-bottom: 90px;
+        -webkit-font-smoothing: antialiased;
       }
       a { color: var(--accent-cyan); text-decoration: none; }
       a:hover { text-decoration: underline; }
-      .container { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+      .container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
 
       /* Header */
       header {
-        background: rgba(5, 5, 8, 0.9);
-        backdrop-filter: blur(12px);
+        background: rgba(5, 8, 17, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border-bottom: 1px solid var(--border-color);
         position: sticky;
         top: 0;
@@ -302,38 +304,38 @@ ${jsonLdScript}
         align-items: center;
         gap: 6px;
         padding: 8px 16px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.88rem;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 0.85rem;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.2s ease;
         border: none;
       }
-      .btn-primary { background: var(--accent-blue); color: #fff; }
-      .btn-primary:hover { background: #1d4ed8; text-decoration: none; }
-      .btn-whatsapp { background: #16a34a; color: #fff; }
-      .btn-whatsapp:hover { background: #15803d; text-decoration: none; }
-      .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-white); }
-      .btn-outline:hover { background: #1e293b; text-decoration: none; }
+      .btn-primary { background: linear-gradient(135deg, #0071e3 0%, #2563eb 100%); color: #fff; box-shadow: 0 2px 12px rgba(37, 99, 235, 0.35); }
+      .btn-primary:hover { transform: scale(1.02); text-decoration: none; }
+      .btn-whatsapp { background: #16a34a; color: #fff; box-shadow: 0 2px 10px rgba(22, 163, 74, 0.35); }
+      .btn-whatsapp:hover { background: #15803d; transform: scale(1.02); text-decoration: none; }
+      .btn-outline { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color); color: var(--text-white); }
+      .btn-outline:hover { background: rgba(255, 255, 255, 0.1); text-decoration: none; }
 
       /* Breadcrumbs */
-      .breadcrumbs { padding: 16px 0 0 0; font-size: 0.85rem; color: var(--text-muted); }
+      .breadcrumbs { padding: 18px 0 0 0; font-size: 0.85rem; color: var(--text-muted); }
       .breadcrumbs a { color: var(--text-muted); }
       .breadcrumbs a:hover { color: var(--accent-cyan); }
 
       /* Hero */
-      .hero { padding: 36px 0 24px 0; }
+      .hero { padding: 36px 0 28px 0; }
       .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
       .badge {
         display: inline-flex;
         align-items: center;
-        padding: 4px 12px;
+        padding: 5px 14px;
         background: rgba(56, 189, 248, 0.1);
         border: 1px solid rgba(56, 189, 248, 0.25);
         color: var(--accent-cyan);
         border-radius: 9999px;
         font-size: 0.82rem;
-        font-weight: 600;
+        font-weight: 700;
       }
       .badge-green {
         background: rgba(16, 185, 129, 0.1);
@@ -346,59 +348,302 @@ ${jsonLdScript}
         font-weight: 800;
         line-height: 1.25;
         margin-bottom: 16px;
-        background: linear-gradient(135deg, #ffffff 60%, #94a3b8 100%);
+        background: linear-gradient(135deg, #ffffff 50%, #94a3b8 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
-      .hero-desc { font-size: 1.1rem; color: var(--text-muted); max-width: 800px; margin-bottom: 24px; line-height: 1.6; }
-      .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; }
-      .hero-ctas .btn { padding: 12px 24px; font-size: 1rem; border-radius: 10px; }
+      .hero-desc { font-size: 1.08rem; color: var(--text-muted); max-width: 840px; margin-bottom: 24px; line-height: 1.6; }
+      .hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 36px; }
+      .hero-ctas .btn { padding: 12px 24px; font-size: 0.95rem; }
 
       /* Local Logistics Info Box */
       .info-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
         gap: 16px;
-        margin-bottom: 40px;
+        margin-bottom: 48px;
       }
       .info-card {
         background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 18px;
-      }
-      .info-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-cyan); font-weight: 700; margin-bottom: 6px; }
-      .info-val { font-size: 0.98rem; font-weight: 600; color: #fff; }
-
-      /* Rates Section */
-      .section-title { font-family: 'Sora', sans-serif; font-size: 1.65rem; font-weight: 700; margin-bottom: 12px; }
-      .section-subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
-      .rates-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 20px;
-        margin-bottom: 48px;
-      }
-      .rate-card {
-        background: var(--bg-card);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         border: 1px solid var(--border-color);
         border-radius: 14px;
-        padding: 24px;
+        padding: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+      .info-label { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent-cyan); font-weight: 800; margin-bottom: 6px; }
+      .info-val { font-size: 1.02rem; font-weight: 700; color: #fff; }
+
+      /* ======================================================== */
+      /* Interactive Rates Section (All 84 Items)                */
+      /* ======================================================== */
+      .rates-section {
+        margin: 48px 0 64px 0;
+        position: relative;
+      }
+      .rates-header-wrap {
+        text-align: center;
+        max-width: 820px;
+        margin: 0 auto 32px auto;
+      }
+      .rates-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 14px;
+        background: rgba(56, 189, 248, 0.12);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        border-radius: 9999px;
+        color: var(--accent-cyan);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+      .section-title { font-family: 'Sora', sans-serif; font-size: 1.95rem; font-weight: 800; margin-bottom: 12px; color: #fff; }
+      .section-subtitle { color: var(--text-muted); font-size: 1rem; margin-bottom: 16px; }
+      .delivery-perk-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.28);
+        border-radius: 9999px;
+        padding: 8px 18px;
+        color: #34d399;
+        font-size: 0.88rem;
+        font-weight: 600;
+        margin-top: 10px;
+      }
+      .perk-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34d399;
+        box-shadow: 0 0 8px #34d399;
+        display: inline-block;
+      }
+
+      /* Search & Filters Controls */
+      .rates-controls {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 18px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      }
+      .rate-search-wrap {
+        position: relative;
+        width: 100%;
+      }
+      .rate-search-wrap .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1rem;
+        color: #94a3b8;
+        pointer-events: none;
+      }
+      .rate-search-input {
+        width: 100%;
+        background: rgba(8, 12, 22, 0.9);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        border-radius: 12px;
+        padding: 12px 42px 12px 46px;
+        color: #fff;
+        font-size: 0.95rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .rate-search-input:focus {
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.25);
+      }
+      .rate-search-clear {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px;
+      }
+
+      /* Category Tabs Scroll */
+      .rate-tabs-scroll {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      .rate-tabs-scroll::-webkit-scrollbar { display: none; }
+      .rate-tab-btn {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 9999px;
+        padding: 8px 16px;
+        color: #cbd5e1;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+      }
+      .rate-tab-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+      .rate-tab-btn.active {
+        background: linear-gradient(135deg, #0071e3 0%, #2563eb 100%);
+        border-color: #38bdf8;
+        color: #ffffff;
+        box-shadow: 0 2px 12px rgba(37, 99, 235, 0.4);
+      }
+
+      /* Results Meta */
+      .rate-results-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding: 0 4px;
+        font-size: 0.85rem;
+        color: #94a3b8;
+      }
+
+      /* Rate Cards Grid */
+      .rate-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 14px;
+      }
+      .rate-item-card {
+        background: var(--bg-card);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 18px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: transform 0.2s, border-color 0.2s;
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
       }
-      .rate-card:hover { transform: translateY(-3px); border-color: rgba(56, 189, 248, 0.4); }
-      .rate-card.featured { border-color: var(--accent-blue); background: linear-gradient(180deg, #0f182c 0%, #0e121d 100%); }
-      .rate-header { margin-bottom: 16px; }
-      .rate-title { font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
-      .rate-price { font-size: 1.75rem; font-weight: 800; color: var(--accent-cyan); font-family: 'Sora', sans-serif; }
-      .rate-price span { font-size: 0.9rem; font-weight: 500; color: var(--text-muted); }
-      .rate-desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; }
-      .rate-features { list-style: none; margin-bottom: 20px; }
-      .rate-features li { font-size: 0.85rem; color: #cbd5e1; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-      .rate-features li::before { content: "✓"; color: #34d399; font-weight: bold; }
+      .rate-item-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(56, 189, 248, 0.35);
+        box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5), 0 0 16px rgba(37, 99, 235, 0.15);
+      }
+      .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .cat-pill {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #94a3b8;
+      }
+      .cat-laundry { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+      .cat-mens { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+      .cat-womens { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+      .cat-household { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+      .cat-woolen { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+      .cat-shoes { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+
+      .item-rate {
+        font-family: 'Sora', sans-serif;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #38bdf8;
+      }
+      .item-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 6px;
+        line-height: 1.35;
+      }
+      .item-note {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        margin-bottom: 12px;
+        line-height: 1.4;
+      }
+      .card-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .card-wa-btn {
+        background: #16a34a;
+        color: #fff !important;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 8px 6px;
+        border-radius: 8px;
+        text-align: center;
+        text-decoration: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        transition: transform 0.15s, background 0.15s;
+      }
+      .card-wa-btn:hover {
+        background: #15803d;
+        transform: scale(1.02);
+      }
+      .card-book-btn {
+        background: linear-gradient(135deg, #0071e3 0%, #2563eb 100%);
+        color: #fff;
+        border: none;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 8px 6px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        transition: transform 0.15s;
+      }
+      .card-book-btn:hover {
+        transform: scale(1.02);
+      }
+
+      .no-results-card {
+        grid-column: 1 / -1;
+        background: rgba(15, 23, 42, 0.6);
+        border: 1px dashed rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 36px 20px;
+        text-align: center;
+        color: #cbd5e1;
+      }
 
       /* Why Us Section */
       .why-section {
@@ -422,17 +667,17 @@ ${jsonLdScript}
         background: #090d16;
         border: 1px dashed #243247;
         border-radius: 12px;
-        padding: 20px;
+        padding: 24px;
         margin-bottom: 48px;
       }
-      .landmarks-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+      .landmarks-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
       .landmark-pill {
         background: #131b2e;
         border: 1px solid #1f2c45;
         color: #cbd5e1;
         font-size: 0.82rem;
-        padding: 6px 12px;
-        border-radius: 6px;
+        padding: 6px 14px;
+        border-radius: 9999px;
       }
 
       /* FAQs */
@@ -440,15 +685,15 @@ ${jsonLdScript}
       details {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 16px 20px;
         cursor: pointer;
       }
       details[open] { border-color: rgba(56, 189, 248, 0.4); }
-      summary { font-weight: 600; font-size: 1rem; color: #f1f5f9; outline: none; }
+      summary { font-weight: 700; font-size: 1rem; color: #f1f5f9; outline: none; }
       details p { margin-top: 12px; font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
 
-      /* Nearby Neighborhoods Internal Links */
+      /* Nearby Neighborhoods */
       .nearby-box {
         border-top: 1px solid var(--border-color);
         padding-top: 32px;
@@ -585,42 +830,32 @@ ${jsonLdScript}
         padding: 16px;
       }
       .concierge-modal-card {
-        width: 340px;
-        max-width: 94vw;
-        background: rgba(10, 14, 23, 0.96);
-        backdrop-filter: blur(28px);
-        -webkit-backdrop-filter: blur(28px);
+        background: rgba(10, 14, 23, 0.95);
         border: 1px solid rgba(56, 189, 248, 0.35);
-        border-radius: 22px;
+        border-radius: 20px;
+        max-width: 360px;
+        width: 100%;
         padding: 22px;
-        box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.85), 0 0 28px rgba(37, 99, 235, 0.3);
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.85);
+        animation: modalPop 0.25s ease-out;
       }
-      .modal-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 14px;
+      @keyframes modalPop {
+        from { opacity: 0; transform: scale(0.92); }
+        to { opacity: 1; transform: scale(1); }
       }
-      .modal-close-btn {
-        background: transparent;
-        border: none;
-        color: #94a3b8;
-        font-size: 20px;
-        cursor: pointer;
-        padding: 4px;
-        line-height: 1;
-      }
+      .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+      .modal-close-btn { background: transparent; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer; }
       .c-input {
         width: 100%;
-        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 10px;
-        background: rgba(255, 255, 255, 0.07);
-        border: 1px solid rgba(255, 255, 255, 0.14);
+        padding: 10px 14px;
         color: #fff;
         font-size: 0.88rem;
         outline: none;
-        box-sizing: border-box;
       }
+      .c-input:focus { border-color: var(--accent-cyan); }
       .c-service-pill {
         display: flex;
         align-items: center;
@@ -628,27 +863,27 @@ ${jsonLdScript}
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
-        padding: 6px 8px;
-        font-size: 0.74rem;
-        color: #e2e8f0;
+        padding: 8px 10px;
+        font-size: 0.75rem;
         cursor: pointer;
+        color: #cbd5e1;
       }
       .c-submit-btn {
         width: 100%;
-        padding: 12px;
-        border-radius: 12px;
         background: linear-gradient(135deg, #16a34a 0%, #2563eb 100%);
         color: #fff;
         border: none;
+        border-radius: 10px;
+        padding: 12px;
         font-size: 0.92rem;
         font-weight: 800;
         cursor: pointer;
-        margin-top: 14px;
+        margin-top: 10px;
         box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
       }
 
       /* Footer */
-      footer { border-top: 1px solid var(--border-color); padding: 32px 0 90px 0; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
+      footer { border-top: 1px solid var(--border-color); padding: 36px 0 90px 0; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
 
       @media (max-width: 640px) {
         .concierge-island {
@@ -686,6 +921,12 @@ ${jsonLdScript}
           font-size: 0.75rem;
           line-height: 32px;
         }
+        .rates-controls {
+          padding: 12px;
+        }
+        .rate-cards-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -720,14 +961,14 @@ ${jsonLdScript}
           <span class="badge badge-green">★ 4.9 Rating (520+ Reviews)</span>
           <span class="badge">⚡ 100% Individual Drum Wash</span>
         </div>
-        <h1>Professional Doorstep Laundry &amp; Dry Cleaning in ${loc.name}, Mumbai</h1>
+        <h1>#1 Doorstep Laundry &amp; Dry Cleaning in ${loc.name}, Mumbai</h1>
         <p class="hero-desc">
-          ${loc.intro} We pick up from your doorstep, sanitize garments in dedicated individual machines with eco-friendly detergents, and return fresh, wrinkle-free clothes within 24 to 48 hours.
+          ${loc.intro} We pick up from your doorstep in ${loc.name}, sanitize garments in dedicated individual machines with eco-friendly detergents, and return fresh, wrinkle-free clothes within 24 to 48 hours.
         </p>
         <div class="hero-ctas">
-          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">💬 Book Pickup in ${loc.name}</a>
+          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">💬 Book Doorstep Pickup in ${loc.name}</a>
           <a href="tel:${PHONE_CLEAN}" class="btn btn-primary">📞 Call ${PHONE_NUMBER}</a>
-          <a href="${DOMAIN}/#book" class="btn btn-outline">📅 Schedule Online (From ₹99/Kg)</a>
+          <a href="#rates" class="btn btn-outline">📋 View Official Rate Card (84 Items)</a>
         </div>
       </section>
 
@@ -743,7 +984,7 @@ ${jsonLdScript}
         </div>
         <div class="info-card">
           <div class="info-label">Daily Pickup Shifts</div>
-          <div class="info-val" style="font-size: 0.88rem;">${loc.pickupSlots.join(' &bull; ')}</div>
+          <div class="info-val" style="font-size: 0.9rem;">${loc.pickupSlots.join(' &bull; ')}</div>
         </div>
         <div class="info-card">
           <div class="info-label">Delivery Guarantee</div>
@@ -751,107 +992,64 @@ ${jsonLdScript}
         </div>
       </section>
 
-      <!-- Rates & Services -->
-      <section>
-        <h2 class="section-title">Transparent Laundry &amp; Dry Clean Rates in ${loc.name}</h2>
-        <p class="section-subtitle">No hidden charges. 100% hygienic processing in individual drums.</p>
-        <div class="rates-grid">
-          <!-- Wash & Fold -->
-          <div class="rate-card featured">
-            <div class="rate-header">
-              <h3 class="rate-title">Wash &amp; Fold</h3>
-              <div class="rate-price">₹99 <span>/ kg</span></div>
-            </div>
-            <p class="rate-desc">Daily apparel from ${loc.name} homes near ${loc.landmarks[0]}, weighed and sanitized with gentle detergents in your own dedicated drum, tumble dried and folded.</p>
-            <ul class="rate-features">
-              <li>100% Individual wash drums</li>
-              <li>Hospital-grade microbial sanitization</li>
-              <li>Delicate fabric softener included</li>
-              <li>Neat packaging &amp; ready to wear</li>
-            </ul>
-            <a href="${waUrl}" class="btn btn-whatsapp" style="justify-content: center;">Book Wash &amp; Fold</a>
+      <!-- ======================================================== -->
+      <!-- Interactive Rate Card Section (Official 84-Item Tariff) -->
+      <!-- ======================================================== -->
+      <section id="rates" class="rates-section">
+        <div class="rates-header-wrap">
+          <div class="rates-badge">Official Mumbai Rate Card</div>
+          <h2 class="section-title">Transparent Laundry &amp; Dry Cleaning Rates in ${loc.name}</h2>
+          <p class="section-subtitle">Zero hidden costs. 100% individual drums, hospital-grade sanitized wash, and Italian steam iron.</p>
+          
+          <div class="delivery-perk-pill">
+            <span class="perk-dot"></span>
+            <span>⚡ Minimum order <strong>₹399</strong> for <strong>100% FREE Doorstep Pickup &amp; Delivery</strong> in ${loc.name} (${loc.pincode})</span>
+          </div>
+        </div>
+
+        <!-- Search & Category Filters -->
+        <div class="rates-controls">
+          <!-- Live Instant Search -->
+          <div class="rate-search-wrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="rate-search-input" class="rate-search-input" placeholder="Search any item (e.g. Saree, Blazer, Blanket, Shoes, Kurta, Curtain)..." oninput="filterRateItems(this.value)" />
+            <button type="button" id="rate-search-clear" class="rate-search-clear" onclick="clearRateSearch()" style="display: none;">✕</button>
           </div>
 
-          <!-- Wash & Steam Iron -->
-          <div class="rate-card">
-            <div class="rate-header">
-              <h3 class="rate-title">Wash &amp; Steam Iron</h3>
-              <div class="rate-price">₹129 <span>/ kg</span></div>
-            </div>
-            <p class="rate-desc">Complete wash cycle followed by high-pressure Italian steam press on hangers or precision folded.</p>
-            <ul class="rate-features">
-              <li>Wrinkle-free Italian steam pressing</li>
-              <li>Collar, cuff &amp; pleat sharpening</li>
-              <li>Delivered on hangers or crisp fold</li>
-              <li>Ideal for formal shirts &amp; trousers</li>
-            </ul>
-            <a href="${waUrl}" class="btn btn-primary" style="justify-content: center;">Book Wash &amp; Iron</a>
+          <!-- Category Tabs -->
+          <div class="rate-tabs-scroll">
+            <button class="rate-tab-btn active" data-cat="all" onclick="setRateTab('all')">✨ All Items (84)</button>
+            <button class="rate-tab-btn" data-cat="laundry" onclick="setRateTab('laundry')">🧺 Laundry by Kg (6)</button>
+            <button class="rate-tab-btn" data-cat="mens" onclick="setRateTab('mens')">👔 Men's Wear (21)</button>
+            <button class="rate-tab-btn" data-cat="womens" onclick="setRateTab('womens')">👗 Women's Wear (21)</button>
+            <button class="rate-tab-btn" data-cat="household" onclick="setRateTab('household')">🏠 Household &amp; Curtains (20)</button>
+            <button class="rate-tab-btn" data-cat="woolen" onclick="setRateTab('woolen')">🧥 Woolen &amp; Quilts (12)</button>
+            <button class="rate-tab-btn" data-cat="shoes" onclick="setRateTab('shoes')">👟 Shoe Spa (4)</button>
           </div>
+        </div>
 
-          <!-- Premium Dry Cleaning -->
-          <div class="rate-card">
-            <div class="rate-header">
-              <h3 class="rate-title">Premium Dry Cleaning</h3>
-              <div class="rate-price">₹199 <span>/ piece onwards</span></div>
-            </div>
-            <p class="rate-desc">Specialized hydrocarbon dry clean for suits, blazers, silk sarees, lehengas, and designer wear.</p>
-            <ul class="rate-features">
-              <li>Eco-safe solvent technology</li>
-              <li>Zari, bead &amp; embroidery protection</li>
-              <li>Custom stain lifting treatment</li>
-              <li>Deluxe dust-proof garment bags</li>
-            </ul>
-            <a href="${waUrl}" class="btn btn-primary" style="justify-content: center;">Book Dry Cleaning</a>
-          </div>
+        <!-- Results Counter -->
+        <div class="rate-results-meta">
+          <span id="rate-results-count">Showing all 84 items across official tariff</span>
+        </div>
 
-          <!-- Sneaker Spa -->
-          <div class="rate-card">
-            <div class="rate-header">
-              <h3 class="rate-title">Sneaker &amp; Shoe Spa</h3>
-              <div class="rate-price">₹299 <span>/ pair onwards</span></div>
-            </div>
-            <p class="rate-desc">Deep sole scrubbing, upper restoration, and microbial deodorization for sports shoes, leather &amp; sneakers.</p>
-            <ul class="rate-features">
-              <li>Midsole de-yellowing treatment</li>
-              <li>Antibacterial ozone deodorization</li>
-              <li>Suede, canvas &amp; knit conditioning</li>
-            </ul>
-            <a href="${waUrl}" class="btn btn-primary" style="justify-content: center;">Book Shoe Spa</a>
-          </div>
-
-          <!-- Quilts & Curtains -->
-          <div class="rate-card">
-            <div class="rate-header">
-              <h3 class="rate-title">Blankets, Quilts &amp; Curtains</h3>
-              <div class="rate-price">₹349 <span>/ item onwards</span></div>
-            </div>
-            <p class="rate-desc">Heavy-duty dust extraction, deep allergen wash, and delicate sanitization with free de-hanging support.</p>
-            <ul class="rate-features">
-              <li>Down &amp; fiber-fill fluffing</li>
-              <li>Deep dust mite extraction</li>
-              <li>Steam sanitization finish</li>
-            </ul>
-            <a href="${waUrl}" class="btn btn-primary" style="justify-content: center;">Book Heavy Care</a>
-          </div>
-
-          <!-- Express 24h -->
-          <div class="rate-card">
-            <div class="rate-header">
-              <h3 class="rate-title">Express 24-Hour Laundry</h3>
-              <div class="rate-price">Fast <span>Turnaround</span></div>
-            </div>
-            <p class="rate-desc">Need garments ready tomorrow? Guaranteed 24-hour return delivery straight to your door in ${loc.name}.</p>
-            <ul class="rate-features">
-              <li>Priority facility routing</li>
-              <li>Fast doorstep collection</li>
-              <li>Available across ${loc.pincode}</li>
-            </ul>
-            <a href="${waUrl}" class="btn btn-whatsapp" style="justify-content: center;">Request Express Delivery</a>
+        <!-- 84 Rate Cards Grid -->
+        <div id="rate-cards-grid" class="rate-cards-grid">
+          ${renderRateCards(loc)}
+          <div id="rate-no-results" class="no-results-card" style="display: none;">
+            <div style="font-size: 2rem; margin-bottom: 8px;">🧺</div>
+            <div style="font-weight: 700; font-size: 1.1rem; color: #fff; margin-bottom: 6px;">No exact item found</div>
+            <p style="font-size: 0.88rem; color: #94a3b8; max-width: 440px; margin: 0 auto 16px auto;">
+              We clean almost every garment and fabric! Message our team on WhatsApp for an instant custom rate for ${loc.name}.
+            </p>
+            <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">
+              💬 Ask on WhatsApp
+            </a>
           </div>
         </div>
       </section>
 
-      <!-- Landmarks Covered -->
+      <!-- Key Landmarks & Societies -->
       <section class="landmarks-box">
         <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff;">Key Landmarks &amp; Societies We Serve in ${loc.name}</h3>
         <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">Our doorstep pickup van operates regularly around:</p>
@@ -894,7 +1092,7 @@ ${jsonLdScript}
           </details>
           <details>
             <summary>How much does wash &amp; fold laundry cost in ${loc.name}?</summary>
-            <p>Our Wash &amp; Fold service starts at just ₹99/Kg, and Wash &amp; Steam Iron is ₹129/Kg. All orders receive 100% individual drum wash with premium hospital-grade sanitization.</p>
+            <p>Our Wash &amp; Fold service starts at just ₹99/Kg, and Wash &amp; Steam Iron is ₹159/Kg. Steam Ironing alone is ₹99/Kg. All garments receive 100% individual drum wash with premium hospital-grade sanitization.</p>
           </details>
           <details>
             <summary>What are your pickup timings for ${loc.name}?</summary>
@@ -953,12 +1151,15 @@ ${jsonLdScript}
             <input type="tel" id="c-phone" required placeholder="Mobile Number (e.g. 98200 12345) *" class="c-input" />
           </div>
           <div style="margin-bottom: 12px;">
-            <div style="font-size: 0.74rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">Select Service:</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-              <label class="c-service-pill"><input type="radio" name="c-service" value="Wash & Fold (₹99/Kg)" checked /> <span>Wash & Fold (₹99/Kg)</span></label>
-              <label class="c-service-pill"><input type="radio" name="c-service" value="Wash & Steam Iron (₹129/Kg)" /> <span>Wash & Iron (₹129/Kg)</span></label>
-              <label class="c-service-pill"><input type="radio" name="c-service" value="Dry Cleaning (₹199+)" /> <span>Dry Cleaning (₹199+)</span></label>
-              <label class="c-service-pill"><input type="radio" name="c-service" value="Shoe Spa (₹299+)" /> <span>Shoe Spa (₹299+)</span></label>
+            <div style="font-size: 0.74rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">Selected Service:</div>
+            <div id="c-service-options" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Wash & Fold Wearable (₹99/Kg)" checked /> <span>Wash &amp; Fold (₹99/Kg)</span></label>
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Wash & Iron (₹159/Kg)" /> <span>Wash &amp; Iron (₹159/Kg)</span></label>
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Stream Iron (₹99/Kg)" /> <span>Stream Iron (₹99/Kg)</span></label>
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Dry Cleaning (From ₹79)" /> <span>Dry Clean (From ₹79)</span></label>
+            </div>
+            <div id="c-custom-service-wrap" style="display: none; margin-top: 8px;">
+              <input type="text" id="c-custom-service" class="c-input" readonly style="border-color: #38bdf8; background: rgba(56, 189, 248, 0.1); font-weight: 700; color: #38bdf8;" />
             </div>
           </div>
           <button type="submit" class="c-submit-btn">
@@ -968,7 +1169,7 @@ ${jsonLdScript}
       </div>
     </div>
 
-    <!-- Concierge Interactive Handler -->
+    <!-- Concierge Interactive Handler & Rate Filters -->
     <script>
       // Rotating Status Carousel (1: Slots, 2: Concierge, 3: Speed)
       (function() {
@@ -1003,20 +1204,105 @@ ${jsonLdScript}
         }
       })();
 
+      // Interactive Rates Filtering
+      var currentRateCategory = 'all';
+      var currentSearchQuery = '';
+
+      function setRateTab(cat) {
+        currentRateCategory = cat;
+        var tabs = document.querySelectorAll('.rate-tab-btn');
+        tabs.forEach(function(btn) {
+          if (btn.getAttribute('data-cat') === cat) {
+            btn.classList.add('active');
+          } else {
+            btn.classList.remove('active');
+          }
+        });
+        applyRateFilters();
+      }
+
+      function filterRateItems(query) {
+        currentSearchQuery = (query || '').toLowerCase().trim();
+        var clearBtn = document.getElementById('rate-search-clear');
+        if (clearBtn) {
+          clearBtn.style.display = currentSearchQuery ? 'block' : 'none';
+        }
+        applyRateFilters();
+      }
+
+      function clearRateSearch() {
+        var input = document.getElementById('rate-search-input');
+        if (input) input.value = '';
+        currentSearchQuery = '';
+        var clearBtn = document.getElementById('rate-search-clear');
+        if (clearBtn) clearBtn.style.display = 'none';
+        applyRateFilters();
+      }
+
+      function applyRateFilters() {
+        var cards = document.querySelectorAll('.rate-item-card');
+        var visibleCount = 0;
+        cards.forEach(function(card) {
+          var cat = card.getAttribute('data-cat');
+          var name = card.getAttribute('data-name');
+          var matchesCat = (currentRateCategory === 'all' || cat === currentRateCategory);
+          var matchesSearch = (!currentSearchQuery || name.indexOf(currentSearchQuery) !== -1 || cat.indexOf(currentSearchQuery) !== -1);
+
+          if (matchesCat && matchesSearch) {
+            card.style.display = 'flex';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        var countEl = document.getElementById('rate-results-count');
+        if (countEl) {
+          countEl.textContent = 'Showing ' + visibleCount + ' items' + (currentRateCategory !== 'all' ? ' in selected category' : '') + (currentSearchQuery ? ' matching "' + currentSearchQuery + '"' : '');
+        }
+
+        var noRes = document.getElementById('rate-no-results');
+        if (noRes) {
+          noRes.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+      }
+
       function openConciergeModal() {
+        var customWrap = document.getElementById('c-custom-service-wrap');
+        if (customWrap) customWrap.style.display = 'none';
         document.getElementById('concierge-modal').style.display = 'flex';
         if (window.dataLayer) window.dataLayer.push({ event: 'booking_modal_opened', source: 'location_concierge_island', locality: '${loc.name}' });
       }
+
+      function openConciergeModalWithService(serviceName) {
+        var customWrap = document.getElementById('c-custom-service-wrap');
+        var customInput = document.getElementById('c-custom-service');
+        if (customWrap && customInput) {
+          customInput.value = serviceName;
+          customWrap.style.display = 'block';
+        }
+        document.getElementById('concierge-modal').style.display = 'flex';
+        if (window.dataLayer) {
+          window.dataLayer.push({ event: 'booking_modal_opened', service: serviceName, source: 'rate_card_click', locality: '${loc.name}' });
+        }
+      }
+
       function closeConciergeModal(e) {
         document.getElementById('concierge-modal').style.display = 'none';
       }
+
       function handleConciergeSubmit(e) {
         e.preventDefault();
         var name = document.getElementById('c-name').value || 'Customer';
         var phone = document.getElementById('c-phone').value;
         if (!phone || phone.length < 10) { alert('Please enter a valid 10-digit mobile number.'); return; }
-        var serviceEl = document.querySelector('input[name="c-service"]:checked');
-        var service = serviceEl ? serviceEl.value : 'Wash & Fold (₹99/Kg)';
+        
+        var customInput = document.getElementById('c-custom-service');
+        var customWrap = document.getElementById('c-custom-service-wrap');
+        var service = (customWrap && customWrap.style.display !== 'none' && customInput && customInput.value) 
+          ? customInput.value 
+          : (document.querySelector('input[name="c-service"]:checked') ? document.querySelector('input[name="c-service"]:checked').value : 'Wash & Fold (₹99/Kg)');
+
         var orderId = 'MML-' + Math.floor(1000 + Math.random() * 9000);
 
         try {
@@ -1059,7 +1345,7 @@ ${jsonLdScript}
         <p><strong>Mr &amp; Mrs Laundry</strong> — Mumbai’s Trusted Laundry &amp; Dry Cleaning Service Since 2012.</p>
         <p style="margin-top: 6px;">Tardeo Store: Shop no. 3/4, No. 508, Ganjawala Tower, Tardeo, Mumbai - 400034 | Facility: Malad East Eco Hub, Mumbai.</p>
         <p style="margin-top: 6px;">Customer Helpline: <a href="tel:${PHONE_CLEAN}" style="color: var(--accent-cyan);">${PHONE_NUMBER}</a> | Email: <a href="mailto:${EMAIL}" style="color: var(--accent-cyan);">${EMAIL}</a></p>
-        <p style="margin-top: 12px; color: #64748b;">&copy; ${new Date().getFullYear()} Mr &amp; Mrs Laundry. All Rights Reserved. • <a href="${DOMAIN}/">Home</a> • <a href="${DOMAIN}/services">Services</a> • <a href="${DOMAIN}/locations/">Locations Directory</a></p>
+        <p style="margin-top: 14px; font-size: 0.78rem;">&copy; ${new Date().getFullYear()} Mr &amp; Mrs Laundry. All Rights Reserved.</p>
       </div>
     </footer>
   </body>
@@ -1069,14 +1355,30 @@ ${jsonLdScript}
   resolveLastmod(loc.slug, htmlContent);
 });
 
-console.log(`✅ Generated ${LOCATIONS.length} individual static micro-market location pages!`);
+console.log(`✅ Generated ${LOCATIONS.length} individual static micro-market location pages with complete 84-item interactive rate cards!`);
 
-// 2. Generate Master Locations Directory Page: public/locations/index.html
-const regionsMap = {};
-LOCATIONS.forEach((loc) => {
-  if (!regionsMap[loc.region]) regionsMap[loc.region] = [];
-  regionsMap[loc.region].push(loc);
-});
+// 2. Generate Master Directory Page (/locations/index.html)
+const directoryTitle = 'Doorstep Laundry & Dry Cleaning Across Mumbai | 30 Locations | Mr & Mrs Laundry';
+const directoryDesc = 'Explore our doorstep laundry & dry cleaning coverage across 30 Mumbai neighborhoods. From Bandra to South Mumbai and Western Suburbs. Free doorstep pickup on ₹399+!';
+const directoryCanonical = `${DOMAIN}/locations/`;
+const dirJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'ItemList',
+      '@id': `${directoryCanonical}#list`,
+      name: 'Mr & Mrs Laundry Mumbai Service Areas',
+      description: directoryDesc,
+      numberOfItems: LOCATIONS.length,
+      itemListElement: LOCATIONS.map((loc, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 1,
+        name: `Laundry & Dry Cleaning in ${loc.name}`,
+        url: `${DOMAIN}/locations/${loc.slug}/`
+      }))
+    }
+  ]
+};
 
 const directoryHtml = `<!doctype html>
 <html lang="en">
@@ -1084,184 +1386,158 @@ const directoryHtml = `<!doctype html>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     ${gtmHeadSnippet('/locations/')}
-    <title>Doorstep Laundry Pickup Locations in Mumbai | Mr &amp; Mrs Laundry</title>
-    <meta name="description" content="Explore Mr &amp; Mrs Laundry doorstep pickup and delivery across South Mumbai, Western Suburbs &amp; Central Mumbai. 100% individual drums from ₹99/Kg." />
-    <link rel="canonical" href="${DOMAIN}/locations/" />
-    <meta name="robots" content="index, follow" />
+    <title>${directoryTitle}</title>
+    <meta name="description" content="${directoryDesc}" />
+    <link rel="canonical" href="${directoryCanonical}" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <script type="application/ld+json">
+${JSON.stringify(dirJsonLd, null, 2).replace(/</g, '\\u003c')}
+    </script>
     <style>
       :root {
-        --bg-main: #050508;
-        --bg-card: #0e121d;
-        --border-color: #1e293b;
-        --accent-blue: #2563eb;
+        --bg-main: #050811;
+        --bg-card: rgba(14, 20, 32, 0.85);
+        --border-color: rgba(255, 255, 255, 0.08);
+        --accent-blue: #0071e3;
         --accent-cyan: #38bdf8;
-        --text-white: #f8fafc;
-        --text-muted: #94a3b8;
+        --accent-green: #10b981;
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: var(--bg-main); color: var(--text-white); font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.6; }
+      body {
+        background: var(--bg-main) radial-gradient(ellipse 100% 60% at 50% -10%, rgba(37, 99, 235, 0.2), transparent 75%);
+        color: #f8fafc;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        line-height: 1.6;
+        padding-bottom: 60px;
+      }
       a { color: var(--accent-cyan); text-decoration: none; }
-      .container { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
-      header { background: rgba(5,5,8,0.9); border-bottom: 1px solid var(--border-color); padding: 14px 0; }
+      .container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+      header {
+        background: rgba(5, 8, 17, 0.85);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 16px 0;
+      }
+      .nav-row { display: flex; justify-content: space-between; align-items: center; }
       .brand-title { font-family: 'Sora', sans-serif; font-weight: 800; font-size: 1.25rem; color: #fff; }
       .brand-title span { color: var(--accent-cyan); }
-      .hero { padding: 48px 0 32px 0; text-align: center; }
-      h1 { font-family: 'Sora', sans-serif; font-size: 2.2rem; font-weight: 800; margin-bottom: 12px; }
-      .hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 700px; margin: 0 auto; }
-      .region-section { margin-bottom: 48px; }
-      .region-title { font-family: 'Sora', sans-serif; font-size: 1.45rem; font-weight: 700; color: #fff; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-      .locations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-      .location-card {
+      .hero { padding: 48px 0 24px 0; text-align: center; }
+      h1 { font-family: 'Sora', sans-serif; font-size: 2.35rem; font-weight: 800; margin-bottom: 12px; }
+      .hero p { color: #94a3b8; max-width: 640px; margin: 0 auto 32px auto; font-size: 1.05rem; }
+      .locations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+      }
+      .loc-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 18px 20px;
-        transition: transform 0.2s, border-color 0.2s;
+        border-radius: 14px;
+        padding: 20px;
+        transition: all 0.2s;
         display: block;
       }
-      .location-card:hover { transform: translateY(-2px); border-color: var(--accent-cyan); text-decoration: none; }
-      .loc-card-title { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 4px; display: flex; justify-content: space-between; }
-      .loc-card-pin { font-size: 0.82rem; color: var(--accent-cyan); font-weight: 600; }
-      .loc-card-desc { font-size: 0.84rem; color: var(--text-muted); margin-top: 6px; }
-      footer { border-top: 1px solid var(--border-color); padding: 32px 0; text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 60px; }
+      .loc-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(56, 189, 248, 0.4);
+        box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.5);
+        text-decoration: none;
+      }
+      .loc-name { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+      .loc-pin { font-size: 0.82rem; color: var(--accent-cyan); font-weight: 600; }
+      .loc-turn { font-size: 0.78rem; color: #94a3b8; margin-top: 8px; }
+      footer { margin-top: 60px; border-top: 1px solid var(--border-color); padding: 32px 0; text-align: center; font-size: 0.85rem; color: #94a3b8; }
     </style>
   </head>
   <body>
     ${GTM_BODY_SNIPPET}
     <header>
-      <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <div class="container nav-row">
         <a href="${DOMAIN}/" class="brand-title"><span>Mr &amp; Mrs</span> Laundry</a>
-        <div>
-          <a href="${DOMAIN}/" style="margin-right: 16px; color: var(--text-muted);">Home</a>
-          <a href="${DOMAIN}/services" style="color: var(--text-muted);">Services</a>
-        </div>
+        <a href="${DOMAIN}/" style="color: #cbd5e1; font-weight: 600; font-size: 0.9rem;">← Back to Home</a>
       </div>
     </header>
-
     <main class="container">
-      <div class="hero">
-        <h1>Doorstep Laundry Pickup Locations Across Mumbai</h1>
-        <p>Providing 100% individual drum wash, Italian steam iron &amp; eco-dry cleaning with scheduled doorstep pickup across ${LOCATIONS.length}+ prime Mumbai micro-markets.</p>
+      <section class="hero">
+        <h1>Doorstep Laundry &amp; Dry Cleaning Across Mumbai</h1>
+        <p>Select your neighborhood to view dedicated pickup slots, landmark coverage, and the complete 84-item rate card.</p>
+      </section>
+      <div class="locations-grid">
+        ${LOCATIONS.map((loc) => `
+          <a href="${DOMAIN}/locations/${loc.slug}/" class="loc-card">
+            <div class="loc-name">${loc.name}</div>
+            <div class="loc-pin">Pincode: ${loc.pincode} &bull; ${loc.region}</div>
+            <div class="loc-turn">⏱ Fast Doorstep Pickup &bull; Free on ₹399+</div>
+          </a>
+        `).join('')}
       </div>
-
-      ${Object.entries(regionsMap)
-        .map(
-          ([region, locs]) => `
-      <section class="region-section">
-        <h2 class="region-title">📍 ${region} (${locs.length} Localities)</h2>
-        <div class="locations-grid">
-          ${locs
-            .map(
-              (l) => `
-          <a href="${DOMAIN}/locations/${l.slug}/" class="location-card">
-            <div class="loc-card-title">
-              <span>${l.name}</span>
-              <span class="loc-card-pin">${l.pincode}</span>
-            </div>
-            <div class="loc-card-desc">Turnaround: ${l.avgTurnaround} &bull; ${l.landmarks.slice(0, 2).join(', ')}</div>
-          </a>`
-            )
-            .join('')}
-        </div>
-      </section>`
-        )
-        .join('')}
     </main>
-
     <footer>
       <div class="container">
-        <p>&copy; ${new Date().getFullYear()} Mr &amp; Mrs Laundry Mumbai. Doorstep pickup across South Mumbai, Western Suburbs &amp; Central Mumbai.</p>
+        <p>&copy; ${new Date().getFullYear()} Mr &amp; Mrs Laundry. Serving 30 Prime Mumbai Neighborhoods.</p>
       </div>
     </footer>
   </body>
 </html>`;
 
 fs.writeFileSync(path.resolve(LOCATIONS_DIR, 'index.html'), directoryHtml, 'utf-8');
-console.log(`✅ Generated Master Locations Directory at public/locations/index.html!`);
+resolveLastmod('locations-directory', directoryHtml);
+console.log('✅ Generated Master Locations Directory at public/locations/index.html!');
 
-// 3. Generate XML Sitemaps
-// A. public/sitemap-main.xml
-// NOTE: /services, /about, /contact, /gallery are client-side-only routes (hash-based,
-// see src/App.jsx) with no matching static file — a direct/crawler request to those paths
-// gets a real HTTP 404 from GitHub Pages, so they must NOT be submitted as indexable URLs.
-const mainPages = [
-  { url: `${DOMAIN}/`, priority: '1.0', changefreq: 'daily', lastmod: CURRENT_DATE },
-  { url: `${DOMAIN}/locations/`, priority: '0.9', changefreq: 'weekly', lastmod: CURRENT_DATE }
-];
+// 3. Save Sitemap
+fs.writeFileSync(LASTMOD_CACHE_PATH, JSON.stringify(lastmodCache, null, 2) + '\n', 'utf-8');
 
-const sitemapMainXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${mainPages
-  .map(
-    (p) => `  <url>
-    <loc>${p.url}</loc>
-    <lastmod>${p.lastmod}</lastmod>
-    <changefreq>${p.changefreq}</changefreq>
-    <priority>${p.priority}</priority>
-  </url>`
-  )
-  .join('\n')}
-</urlset>`;
-fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap-main.xml'), sitemapMainXml, 'utf-8');
-
-// B. public/sitemap-locations.xml — lastmod per location comes from resolveLastmod()
-// above (same hash-cached date as the comprehensive sitemap below), not a blanket "today".
 const sitemapLocationsXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${DOMAIN}/locations/</loc>
+    <lastmod>${lastmodBySlug['locations-directory'] || CURRENT_DATE}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+${LOCATIONS.map((loc) => `  <url>
+    <loc>${DOMAIN}/locations/${loc.slug}/</loc>
+    <lastmod>${lastmodBySlug[loc.slug] || CURRENT_DATE}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`).join('\n')}
+</urlset>
+`;
+fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap-locations.xml'), sitemapLocationsXml.trim(), 'utf-8');
+
+const sitemapMainXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${DOMAIN}/</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${DOMAIN}/services</loc>
     <lastmod>${CURRENT_DATE}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
-${LOCATIONS.map(
-  (l) => `  <url>
-    <loc>${DOMAIN}/locations/${l.slug}/</loc>
-    <lastmod>${lastmodBySlug[l.slug] || CURRENT_DATE}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>`
-).join('\n')}
-</urlset>`;
-fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap-locations.xml'), sitemapLocationsXml, 'utf-8');
+</urlset>
+`;
+fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap-main.xml'), sitemapMainXml.trim(), 'utf-8');
 
-// C. public/sitemap.xml (Comprehensive Multi-URL Sitemap including all main + 32 location URLs)
-// Having all URLs directly in sitemap.xml ensures instant GSC parsing without requiring nested traversal,
-// while also generating sitemap-main.xml and sitemap-locations.xml for segmented tracking!
-const allPages = [
-  ...mainPages,
-  ...LOCATIONS.map((l) => ({
-    url: `${DOMAIN}/locations/${l.slug}/`,
-    priority: '0.85',
-    changefreq: 'weekly',
-    lastmod: lastmodBySlug[l.slug] || CURRENT_DATE
-  }))
-];
+const sitemapIndexXml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${DOMAIN}/sitemap-main.xml</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
+  </sitemap>
+  <sitemap>
+    <loc>${DOMAIN}/sitemap-locations.xml</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
+  </sitemap>
+</sitemapindex>
+`;
+fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap.xml'), sitemapIndexXml.trim(), 'utf-8');
 
-const sitemapComprehensiveXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${allPages
-  .map(
-    (p) => `  <url>
-    <loc>${p.url}</loc>
-    <lastmod>${p.lastmod}</lastmod>
-    <changefreq>${p.changefreq}</changefreq>
-    <priority>${p.priority}</priority>
-  </url>`
-  )
-  .join('\n')}
-</urlset>`;
-fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap.xml'), sitemapComprehensiveXml, 'utf-8');
-
-fs.writeFileSync(LASTMOD_CACHE_PATH, JSON.stringify(lastmodCache, null, 2) + '\n', 'utf-8');
-
-console.log(`✅ Generated Sitemaps:`);
-console.log(`   - public/sitemap.xml (${allPages.length} URLs)`);
-console.log(`   - public/sitemap-main.xml (${mainPages.length} URLs)`);
-console.log(`   - public/sitemap-locations.xml (${LOCATIONS.length + 1} URLs)`);
-console.log(`🎉 Programmatic Local SEO generation finished successfully!`);
+console.log('✅ Generated Sitemaps successfully!');
+console.log('🎉 Programmatic Local SEO generation finished successfully!');

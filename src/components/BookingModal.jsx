@@ -88,7 +88,9 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
       order_id: newOrderId,
       service: selectedService,
       locality: locality,
-      slot: selectedSlot
+      slot: selectedSlot,
+      value: 399,
+      currency: 'INR'
     });
 
     setTimeout(() => {
@@ -126,7 +128,7 @@ export default function BookingModal({ isOpen, onClose, initialData }) {
   };
 
   const openWhatsAppConfirmation = () => {
-    trackEvent('booking_whatsapp_sent', { order_id: orderId, locality: locality });
+    trackEvent('booking_whatsapp_sent', { order_id: orderId, locality: locality, value: 399, currency: 'INR' });
     const text = encodeURIComponent(
       `*New Mr & Mrs Laundry Booking Request*\n` +
       `🔖 Order ID: ${orderId || 'N/A'}\n` +

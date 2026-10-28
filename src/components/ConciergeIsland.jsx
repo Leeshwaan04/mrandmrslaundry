@@ -199,7 +199,9 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
       order_id: orderId,
       service: selectedService,
       locality: locality,
-      source: 'concierge_island'
+      source: 'concierge_island',
+      value: 399,
+      currency: 'INR'
     });
 
     // 3. Confetti Celebration
@@ -224,7 +226,7 @@ export default function ConciergeIsland({ onOpenFullBooking }) {
         `🧺 Service: ${selectedService}\n\n` +
         `Please confirm the earliest doorstep pickup window. Thank you!`;
 
-      trackEvent('booking_whatsapp_sent', { order_id: orderId, locality: locality, source: 'concierge_island' });
+      trackEvent('booking_whatsapp_sent', { order_id: orderId, locality: locality, source: 'concierge_island', value: 399, currency: 'INR' });
 
       setTimeout(() => {
         window.open(`https://wa.me/${businessInfo.whatsappDigits}?text=${encodeURIComponent(waMessage)}`, '_blank', 'noopener,noreferrer');

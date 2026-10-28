@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Sparkles,
@@ -14,8 +14,12 @@ import {
   Calculator,
   Plus,
   Minus,
-  RotateCcw
+  RotateCcw,
+  Search,
+  MessageCircle
 } from 'lucide-react';
+import { trackEvent } from '../analytics';
+import PRICE_DATA from '../../content/price-list.json';
 
 export const ALL_SERVICES = [
   {
@@ -108,46 +112,39 @@ export const ALL_SERVICES = [
   },
 ];
 
+export const ALL_RATE_ITEMS = [
+  ...PRICE_DATA.laundryServices.map((i) => ({ ...i, cat: 'laundry', catLabel: '🧺 Laundry by Kg', item: i.name })),
+  ...PRICE_DATA.mensDryCleaning.map((i) => ({ ...i, cat: 'mens', catLabel: "👔 Men's Wear" })),
+  ...PRICE_DATA.womensDryCleaning.map((i) => ({ ...i, cat: 'womens', catLabel: "👗 Women's Wear" })),
+  ...PRICE_DATA.householdDryCleaning.map((i) => ({ ...i, cat: 'household', catLabel: '🏠 Household & Linens' })),
+  ...PRICE_DATA.woolenDryCleaning.map((i) => ({ ...i, cat: 'woolen', catLabel: '🧥 Woolen Wear' })),
+  ...PRICE_DATA.shoeLaundry.map((i) => ({ ...i, cat: 'shoes', catLabel: '👟 Shoe Laundry' }))
+];
+
 export const RATE_CARD = {
-  mens: [
-    { item: 'Shirt / T-Shirt', rate: '₹99' },
-    { item: 'Pant / Jeans / Trousers', rate: '₹99' },
-    { item: 'Kurta (Plain)', rate: '₹99' },
-    { item: 'Kurta (Designer / Silk)', rate: '₹149' },
-    { item: 'Coat / Blazer', rate: '₹249' },
-    { item: 'Sherwani (2-Piece)', rate: '₹299' },
-    { item: 'Full Suit (2-Piece)', rate: '₹349' },
-    { item: 'Winter Jacket / Overcoat', rate: '₹249' },
-  ],
-  womens: [
-    { item: 'Top / Blouse', rate: '₹99' },
-    { item: 'Kurti (Plain)', rate: '₹99' },
-    { item: 'Kurti (Heavy / Embroidered)', rate: '₹149' },
-    { item: 'Saree (Plain)', rate: '₹199' },
-    { item: 'Saree (Silk / Heavy Zari)', rate: '₹299' },
-    { item: 'Salwar Kameez / Suit Set', rate: '₹249' },
-    { item: 'Gown / Lehenga', rate: '₹299' },
-    { item: 'Dupatta / Stole', rate: '₹79' },
-  ],
-  household: [
-    { item: 'Single Blanket / Quilt', rate: '₹299' },
-    { item: 'Double Blanket / Quilt', rate: '₹399' },
-    { item: 'Single Bed Sheet', rate: '₹129' },
-    { item: 'Double Bed Sheet', rate: '₹199' },
-    { item: 'Pillow Cover (Pair)', rate: '₹49' },
-    { item: 'Curtain Cleaning', rate: '₹14 / Sq.ft' },
-  ],
-  footwear: [
-    { item: 'Sneakers / Canvas', rate: '₹299' },
-    { item: 'Sports & Running Shoes', rate: '₹399' },
-    { item: 'Leather Formal Shoes', rate: '₹499' },
-    { item: 'Suede / Nubuck Footwear', rate: '₹449' },
-    { item: 'Boots / High Tops', rate: '₹499' },
-  ],
+  all: ALL_RATE_ITEMS,
+  laundry: PRICE_DATA.laundryServices.map((i) => ({ ...i, item: i.name })),
+  mens: PRICE_DATA.mensDryCleaning,
+  womens: PRICE_DATA.womensDryCleaning,
+  household: PRICE_DATA.householdDryCleaning,
+  woolen: PRICE_DATA.woolenDryCleaning,
+  shoes: PRICE_DATA.shoeLaundry,
 };
 
 export default function ServicesPage({ onOpenBooking }) {
-  const [activeTab, setActiveTab] = useState('mens');
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredItems = useMemo(() => {
+    return ALL_RATE_ITEMS.filter((item) => {
+      const matchesTab = activeTab === 'all' || item.cat === activeTab;
+      const matchesSearch =
+        !searchQuery.trim() ||
+        item.item.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+        item.catLabel.toLowerCase().includes(searchQuery.toLowerCase().trim());
+      return matchesTab && matchesSearch;
+    });
+  }, [activeTab, searchQuery]);
 
   // Interactive Calculator State
   const [calcItems, setCalcItems] = useState({
@@ -559,44 +556,120 @@ export default function ServicesPage({ onOpenBooking }) {
       </section>
 
       {/* Comprehensive Rate Card */}
-      <section style={{ maxWidth: '1080px', margin: '0 auto', padding: '90px 24px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800, color: '#fff', marginBottom: '12px' }}>
-            Detailed Rate Card Snapshot
-          </h2>
-          <p style={{ color: '#86868b', fontSize: '1rem' }}>
-            Get top-quality services at unbeatable prices. Transparent, honest, zero hidden charges.
-          </p>
-
-          {/* Category Tabs */}
+      <section style={{ maxWidth: '1240px', margin: '0 auto', padding: '90px 24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <div
             style={{
               display: 'inline-flex',
-              background: 'rgba(255, 255, 255, 0.08)',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '6px 16px',
+              borderRadius: '999px',
+              background: 'rgba(0, 113, 227, 0.12)',
+              border: '1px solid rgba(0, 113, 227, 0.3)',
+              marginBottom: '16px',
+            }}
+          >
+            <Sparkles size={14} color="#64d2ff" />
+            <span style={{ fontSize: '0.8rem', color: '#64d2ff', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Official 84-Item Transparent Rate Card
+            </span>
+          </div>
+
+          <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 800, color: '#fff', marginBottom: '12px' }}>
+            Complete Price List
+          </h2>
+          <p style={{ color: '#86868b', fontSize: '1.05rem', maxWidth: '640px', margin: '0 auto' }}>
+            Zero hidden charges. Sanitized individual drums, Italian steam pressing, and free doorstep pickup on orders above ₹399.
+          </p>
+
+          {/* Search Box */}
+          <div style={{ maxWidth: '520px', margin: '28px auto 0 auto', position: 'relative' }}>
+            <Search size={18} color="#86868b" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <input
+              type="text"
+              placeholder="Search 84 items (e.g. Saree, Blazer, Blanket, Shoes, Curtains)..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (e.target.value.length > 2) {
+                  trackEvent('rate_card_search', { query: e.target.value });
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '14px 16px 14px 46px',
+                borderRadius: '16px',
+                background: 'rgba(255, 255, 255, 0.06)',
+                border: '1px solid rgba(255, 255, 255, 0.14)',
+                color: '#fff',
+                fontSize: '0.95rem',
+                outline: 'none',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+              }}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  color: '#a1a1a6',
+                  borderRadius: '999px',
+                  width: '24px',
+                  height: '24px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.75rem',
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Category Filter Tabs */}
+          <div
+            style={{
+              display: 'inline-flex',
+              background: 'rgba(255, 255, 255, 0.06)',
               padding: '6px',
               borderRadius: '999px',
               gap: '6px',
-              marginTop: '28px',
+              marginTop: '24px',
               flexWrap: 'wrap',
               justifyContent: 'center',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
             }}
           >
             {[
-              { id: 'mens', label: "Men's Wear" },
-              { id: 'womens', label: "Women's Wear" },
-              { id: 'household', label: 'Household & Bedding' },
-              { id: 'footwear', label: 'Shoe Spa & Restoration' },
+              { id: 'all', label: `✨ All (${ALL_RATE_ITEMS.length})` },
+              { id: 'laundry', label: `🧺 Laundry (${PRICE_DATA.laundryServices.length})` },
+              { id: 'mens', label: `👔 Men's (${PRICE_DATA.mensDryCleaning.length})` },
+              { id: 'womens', label: `👗 Women's (${PRICE_DATA.womensDryCleaning.length})` },
+              { id: 'household', label: `🏠 Household (${PRICE_DATA.householdDryCleaning.length})` },
+              { id: 'woolen', label: `🧥 Woolen (${PRICE_DATA.woolenDryCleaning.length})` },
+              { id: 'shoes', label: `👟 Shoe Spa (${PRICE_DATA.shoeLaundry.length})` },
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  trackEvent('rate_tab_select', { tab: tab.id });
+                }}
                 style={{
-                  padding: '8px 20px',
+                  padding: '8px 18px',
                   borderRadius: '999px',
                   border: 'none',
                   background: activeTab === tab.id ? '#0071e3' : 'transparent',
                   color: activeTab === tab.id ? '#fff' : '#a1a1a6',
-                  fontSize: '0.86rem',
+                  fontSize: '0.84rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.2s ease',
@@ -606,56 +679,155 @@ export default function ServicesPage({ onOpenBooking }) {
               </button>
             ))}
           </div>
+
+          <div style={{ marginTop: '16px', fontSize: '0.85rem', color: '#64d2ff' }}>
+            Showing {filteredItems.length} of {ALL_RATE_ITEMS.length} items
+          </div>
         </div>
 
-        {/* Rate Table */}
-        <div
-          style={{
-            background: 'rgba(15, 16, 22, 0.75)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '24px',
-            overflow: 'hidden',
-          }}
-        >
+        {/* Rate Cards Grid */}
+        {filteredItems.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', color: '#86868b' }}>
+            <p style={{ fontSize: '1.1rem', marginBottom: '8px' }}>No items match "{searchQuery}"</p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setActiveTab('all');
+              }}
+              style={{
+                marginTop: '12px',
+                padding: '8px 18px',
+                borderRadius: '999px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+              }}
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: '1fr 140px',
-              padding: '16px 28px',
-              background: 'rgba(255, 255, 255, 0.05)',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              color: '#86868b',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: '16px',
             }}
           >
-            <div>Garment / Article</div>
-            <div style={{ textAlign: 'right' }}>Dry Clean Rate</div>
-          </div>
+            {filteredItems.map((item) => {
+              const waText = encodeURIComponent(`Hi Mr & Mrs Laundry, I would like to book doorstep pickup for ${item.item} (${item.rate}) in Mumbai.`);
+              const waUrl = `https://wa.me/919152233822?text=${waText}`;
 
-          <div>
-            {RATE_CARD[activeTab]?.map((row, idx) => (
-              <div
-                key={row.item}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 140px',
-                  padding: '16px 28px',
-                  borderBottom:
-                    idx === RATE_CARD[activeTab].length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.04)',
-                  fontSize: '0.94rem',
-                  color: '#f5f5f7',
-                  alignItems: 'center',
-                }}
-              >
-                <div style={{ fontWeight: 500 }}>{row.item}</div>
-                <div style={{ textAlign: 'right', fontWeight: 700, color: '#64d2ff' }}>{row.rate}</div>
-              </div>
-            ))}
+              return (
+                <div
+                  key={`${item.cat}-${item.item}`}
+                  style={{
+                    background: 'rgba(15, 16, 22, 0.75)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '18px',
+                    padding: '20px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'transform 0.2s ease, border-color 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(0, 113, 227, 0.5)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                      <span
+                        style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '3px 8px',
+                          borderRadius: '6px',
+                          background: 'rgba(255, 255, 255, 0.06)',
+                          color: '#a1a1a6',
+                        }}
+                      >
+                        {item.catLabel}
+                      </span>
+                      <span style={{ fontSize: '1.15rem', fontWeight: 800, color: '#64d2ff' }}>
+                        {item.rate}
+                      </span>
+                    </div>
+
+                    <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#ffffff', marginBottom: '6px' }}>
+                      {item.item}
+                    </h4>
+
+                    {item.note && (
+                      <p style={{ fontSize: '0.8rem', color: '#86868b', lineHeight: 1.4, marginBottom: '16px' }}>
+                        {item.note}
+                      </p>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', marginTop: item.note ? '0' : '16px' }}>
+                    <a
+                      href={waUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => trackEvent('rate_item_whatsapp_click', { item: item.item, rate: item.rate })}
+                      style={{
+                        flex: 1,
+                        padding: '9px 12px',
+                        borderRadius: '10px',
+                        background: 'rgba(37, 211, 102, 0.12)',
+                        border: '1px solid rgba(37, 211, 102, 0.3)',
+                        color: '#25D366',
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <MessageCircle size={14} />
+                      <span>WhatsApp</span>
+                    </a>
+
+                    <button
+                      onClick={() => {
+                        trackEvent('rate_item_book_click', { item: item.item, rate: item.rate });
+                        onOpenBooking({ service: item.item });
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: '9px 12px',
+                        borderRadius: '10px',
+                        background: 'rgba(0, 113, 227, 0.2)',
+                        border: '1px solid rgba(0, 113, 227, 0.4)',
+                        color: '#64d2ff',
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <span>Book</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+        )}
       </section>
     </div>
   );
