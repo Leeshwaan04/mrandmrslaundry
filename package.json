@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "generate:pseo": "node scripts/generate-pseo.js",
-    "build": "node scripts/generate-pseo.js && vite build",
+    "build": "node scripts/generate-pseo.js && node scripts/generate-comparisons.js && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "postinstall": "patch-package"

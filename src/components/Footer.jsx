@@ -164,6 +164,28 @@ export default function Footer({ onNavigate, onOpenBooking, onOpenTrackOrder }) 
                 </li>
               ))}
 
+              <li>
+                <a
+                  href="/locations/"
+                  style={{ color: '#64d2ff', fontSize: '0.88rem', textDecoration: 'none', fontWeight: 600 }}
+                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                >
+                  📍 30 Mumbai Neighborhoods
+                </a>
+              </li>
+
+              <li>
+                <a
+                  href="/compare/"
+                  style={{ color: '#bf5af2', fontSize: '0.88rem', textDecoration: 'none', fontWeight: 600 }}
+                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                >
+                  ⚔️ Compare with Competitors
+                </a>
+              </li>
+
               <li style={{ paddingTop: '8px' }}>
                 <button
                   onClick={onOpenTrackOrder}
@@ -280,6 +302,19 @@ export default function Footer({ onNavigate, onOpenBooking, onOpenTrackOrder }) 
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Competitor Comparisons SEO Row */}
+        <div style={{ padding: '20px 0', borderTop: '1px solid rgba(255, 255, 255, 0.05)', fontSize: '0.8rem', color: '#6e6e73', display: 'flex', flexWrap: 'wrap', gap: '8px 16px', alignItems: 'center' }}>
+          <span style={{ color: '#86868b', fontWeight: 600 }}>Mumbai Service Comparisons:</span>
+          <a href="/compare/tumbledry-alternative-mumbai/" style={{ color: '#94a3b8', textDecoration: 'none' }}>vs Tumbledry</a>
+          <a href="/compare/meralaundry-alternative-mumbai/" style={{ color: '#94a3b8', textDecoration: 'none' }}>vs Mera Laundry</a>
+          <a href="/compare/pressto-alternative-mumbai/" style={{ color: '#94a3b8', textDecoration: 'none' }}>vs Pressto</a>
+          <a href="/compare/uclean-alternative-mumbai/" style={{ color: '#94a3b8', textDecoration: 'none' }}>vs UClean</a>
+          <a href="/compare/dhobilite-alternative-mumbai/" style={{ color: '#94a3b8', textDecoration: 'none' }}>vs DhobiLite</a>
+          <a href="/compare/spin-n-press-alternative-mumbai/" style={{ color: '#94a3b8', textDecoration: 'none' }}>vs Spin N Press</a>
+          <a href="/compare/fabricspa-alternative-mumbai/" style={{ color: '#94a3b8', textDecoration: 'none' }}>vs Fabricspa</a>
+          <a href="/compare/" style={{ color: '#38bdf8', textDecoration: 'none', fontWeight: 600 }}>&bull; All Comparisons &rarr;</a>
         </div>
 
         {/* Bottom Bar: Copyright & Terms */}

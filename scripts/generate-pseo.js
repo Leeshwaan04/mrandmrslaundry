@@ -1535,6 +1535,10 @@ const sitemapIndexXml = `<?xml version="1.0" encoding="UTF-8"?>
     <loc>${DOMAIN}/sitemap-locations.xml</loc>
     <lastmod>${CURRENT_DATE}</lastmod>
   </sitemap>
+  <sitemap>
+    <loc>${DOMAIN}/sitemap-comparisons.xml</loc>
+    <lastmod>${CURRENT_DATE}</lastmod>
+  </sitemap>
 </sitemapindex>
 `;
 fs.writeFileSync(path.resolve(PUBLIC_DIR, 'sitemap.xml'), sitemapIndexXml.trim(), 'utf-8');
