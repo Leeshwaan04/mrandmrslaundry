@@ -466,28 +466,168 @@ ${jsonLdScript}
       }
       .nearby-link:hover { color: #fff; border-color: var(--accent-cyan); text-decoration: none; }
 
-      /* Sticky Mobile CTA Bar */
-      .mobile-cta-bar {
+      /* Floating VisionOS Concierge Island */
+      .concierge-island {
         position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(14, 18, 29, 0.96);
-        backdrop-filter: blur(12px);
-        border-top: 1px solid var(--border-color);
-        padding: 12px 20px;
+        bottom: 22px;
+        right: 22px;
+        z-index: 900;
+        background: rgba(10, 14, 23, 0.88);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(56, 189, 248, 0.28);
+        border-radius: 9999px;
+        padding: 6px 8px 6px 14px;
+        box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.75), 0 0 24px -2px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         display: flex;
-        gap: 12px;
-        z-index: 100;
+        align-items: center;
+        gap: 10px;
+        user-select: none;
       }
-      .mobile-cta-bar .btn { flex: 1; justify-content: center; padding: 12px; font-size: 0.92rem; }
+      .island-status {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding-right: 6px;
+        border-right: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34d399;
+        box-shadow: 0 0 8px #34d399;
+        display: inline-block;
+      }
+      .status-text {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #e2e8f0;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+      }
+      .island-wa-btn {
+        background: #16a34a;
+        color: #ffffff !important;
+        border: none;
+        border-radius: 9999px;
+        padding: 8px 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none !important;
+        box-shadow: 0 2px 10px rgba(22, 163, 74, 0.35);
+        transition: transform 0.2s;
+      }
+      .island-wa-btn:hover { transform: scale(1.04); }
+      .island-book-btn {
+        background: linear-gradient(135deg, #0071e3 0%, #2563eb 100%);
+        color: #ffffff;
+        border: none;
+        border-radius: 9999px;
+        padding: 8px 15px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 2px 12px rgba(37, 99, 235, 0.45);
+        transition: transform 0.2s;
+      }
+      .island-book-btn:hover { transform: scale(1.04); }
+
+      /* Concierge Modal Backdrop & Card */
+      .concierge-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .concierge-modal-card {
+        width: 340px;
+        max-width: 94vw;
+        background: rgba(10, 14, 23, 0.96);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 22px;
+        padding: 22px;
+        box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.85), 0 0 28px rgba(37, 99, 235, 0.3);
+      }
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      .modal-close-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px;
+        line-height: 1;
+      }
+      .c-input {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #fff;
+        font-size: 0.88rem;
+        outline: none;
+        box-sizing: border-box;
+      }
+      .c-service-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 6px 8px;
+        font-size: 0.74rem;
+        color: #e2e8f0;
+        cursor: pointer;
+      }
+      .c-submit-btn {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #16a34a 0%, #2563eb 100%);
+        color: #fff;
+        border: none;
+        font-size: 0.92rem;
+        font-weight: 800;
+        cursor: pointer;
+        margin-top: 14px;
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45);
+      }
 
       /* Footer */
-      footer { border-top: 1px solid var(--border-color); padding: 32px 0 40px 0; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
+      footer { border-top: 1px solid var(--border-color); padding: 32px 0 90px 0; font-size: 0.85rem; color: var(--text-muted); text-align: center; }
 
-      @media (min-width: 768px) {
-        .mobile-cta-bar { display: none; }
-        body { padding-bottom: 0; }
+      @media (max-width: 640px) {
+        .concierge-island {
+          bottom: 16px;
+          right: 12px;
+          left: 12px;
+          justify-content: space-between;
+          padding: 6px 10px;
+        }
+        .status-text { display: none; }
       }
     </style>
   </head>
@@ -720,11 +860,104 @@ ${jsonLdScript}
       </section>
     </main>
 
-    <!-- Sticky Mobile CTA Bar -->
-    <div class="mobile-cta-bar">
-      <a href="tel:${PHONE_CLEAN}" class="btn btn-primary">📞 Call Now</a>
-      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">💬 WhatsApp Booking</a>
+    <!-- Floating VisionOS Concierge Island -->
+    <div id="concierge-island" class="concierge-island">
+      <div class="island-status">
+        <span class="status-dot"></span>
+        <span class="status-text">${loc.name} Van Active</span>
+      </div>
+      <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="island-wa-btn" id="island-wa-link">
+        💬 WhatsApp
+      </a>
+      <button type="button" class="island-book-btn" onclick="openConciergeModal()">
+        ⚡ Book (30s)
+      </button>
     </div>
+
+    <!-- Express Concierge Modal -->
+    <div id="concierge-modal" class="concierge-modal-backdrop" style="display: none;" onclick="closeConciergeModal(event)">
+      <div class="concierge-modal-card" onclick="event.stopPropagation()">
+        <div class="modal-head">
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #fff;">Fast Doorstep Pickup</h3>
+            <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #94a3b8;">${loc.name} (${loc.pincode}) &bull; Free pickup ₹399+</p>
+          </div>
+          <button class="modal-close-btn" onclick="closeConciergeModal()">&times;</button>
+        </div>
+        <form onsubmit="handleConciergeSubmit(event)">
+          <div style="margin-bottom: 10px;">
+            <input type="text" id="c-name" placeholder="Your Name (e.g. Rahul S.)" class="c-input" />
+          </div>
+          <div style="margin-bottom: 12px;">
+            <input type="tel" id="c-phone" required placeholder="Mobile Number (e.g. 98200 12345) *" class="c-input" />
+          </div>
+          <div style="margin-bottom: 12px;">
+            <div style="font-size: 0.74rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 6px;">Select Service:</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Wash & Fold (₹99/Kg)" checked /> <span>Wash & Fold (₹99/Kg)</span></label>
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Wash & Steam Iron (₹129/Kg)" /> <span>Wash & Iron (₹129/Kg)</span></label>
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Dry Cleaning (₹199+)" /> <span>Dry Cleaning (₹199+)</span></label>
+              <label class="c-service-pill"><input type="radio" name="c-service" value="Shoe Spa (₹299+)" /> <span>Shoe Spa (₹299+)</span></label>
+            </div>
+          </div>
+          <button type="submit" class="c-submit-btn">
+            ⚡ Confirm Pickup on WhatsApp
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Concierge Interactive Handler -->
+    <script>
+      function openConciergeModal() {
+        document.getElementById('concierge-modal').style.display = 'flex';
+        if (window.dataLayer) window.dataLayer.push({ event: 'booking_modal_opened', source: 'location_concierge_island', locality: '${loc.name}' });
+      }
+      function closeConciergeModal(e) {
+        document.getElementById('concierge-modal').style.display = 'none';
+      }
+      function handleConciergeSubmit(e) {
+        e.preventDefault();
+        var name = document.getElementById('c-name').value || 'Customer';
+        var phone = document.getElementById('c-phone').value;
+        if (!phone || phone.length < 10) { alert('Please enter a valid 10-digit mobile number.'); return; }
+        var serviceEl = document.querySelector('input[name="c-service"]:checked');
+        var service = serviceEl ? serviceEl.value : 'Wash & Fold (₹99/Kg)';
+        var orderId = 'MML-' + Math.floor(1000 + Math.random() * 9000);
+
+        try {
+          var existing = JSON.parse(localStorage.getItem('mml_leads_cache') || '[]');
+          existing.unshift({
+            id: orderId,
+            customerName: name,
+            phone: phone,
+            locality: '${loc.name}',
+            pincode: '${loc.pincode}',
+            service: service,
+            status: 'New Inquiry',
+            createdAt: new Date().toISOString(),
+            source: '${loc.name} Location Page'
+          });
+          localStorage.setItem('mml_leads_cache', JSON.stringify(existing));
+        } catch(err) {}
+
+        if (window.dataLayer) {
+          window.dataLayer.push({ event: 'booking_confirmed', order_id: orderId, locality: '${loc.name}', service: service, source: 'location_concierge_island' });
+          window.dataLayer.push({ event: 'booking_whatsapp_sent', order_id: orderId, locality: '${loc.name}', source: 'location_concierge_island' });
+        }
+
+        var text = '*New Mr & Mrs Laundry Express Pickup Request*\\n' +
+          '🆔 Order: ' + orderId + '\\n' +
+          '👤 Name: ' + name + '\\n' +
+          '📞 Phone: ' + phone + '\\n' +
+          '📍 Locality: ${loc.name} (${loc.pincode})\\n' +
+          '🧺 Service: ' + service + '\\n\\n' +
+          'Please confirm earliest doorstep pickup window. Thank you!';
+
+        window.open('https://wa.me/${PHONE_CLEAN}?text=' + encodeURIComponent(text), '_blank');
+        closeConciergeModal();
+      }
+    </script>
 
     <!-- Footer -->
     <footer>

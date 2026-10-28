@@ -10,6 +10,7 @@ import ContactPage from './components/ContactPage';
 import BookingModal from './components/BookingModal';
 import TrackOrderModal from './components/TrackOrderModal';
 import OrchestratedEaseReverseDemo from './components/OrchestratedEaseReverseDemo';
+import ConciergeIsland from './components/ConciergeIsland';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -144,6 +145,9 @@ export default function App() {
         onOpenBooking={() => handleOpenBooking()}
         onOpenTrackOrder={() => setIsTrackOrderOpen(true)}
       />
+
+      {/* Floating VisionOS Concierge Island (WhatsApp & Express Booking) */}
+      <ConciergeIsland onOpenFullBooking={handleOpenBooking} />
 
       {/* Doorstep Booking Concierge Drawer / Modal */}
       <BookingModal
